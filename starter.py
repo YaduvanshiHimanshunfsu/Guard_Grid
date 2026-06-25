@@ -128,6 +128,72 @@ def explain_v2():
     log_and_print("="*80)
     input("Press Enter to begin the V2 full-day simulation... ")
 
+def demo_math_v1():
+    log_and_print("\n" + "="*80)
+    log_and_print("  INTERACTIVE MATHEMATICAL WALKTHROUGH (V1)")
+    log_and_print("="*80)
+    log_and_print("Using toy primes (p=23, g=5) to show the exact math under the hood.")
+    log_and_print("\n[ Dataset — Rows 0, 1, 2 ]")
+    log_and_print("  SM1: 3.763 kW  -> x1 = 3763")
+    log_and_print("  SM2: 5.067 kW  -> x2 = 5067")
+    log_and_print("  SM3: 3.405 kW  -> x3 = 3405")
+    
+    input("\n[Press Enter to execute Alg 1: DH Key Agreement] ")
+    log_and_print("\n--- Alg 1: DH Key Agreement ---")
+    log_and_print("CC  gen: priv=6 -> pub=5^6 mod 23 = 8")
+    log_and_print("SM1 gen: priv=4 -> pub=5^4 mod 23 = 4")
+    log_and_print("SM2 gen: priv=7 -> pub=5^7 mod 23 = 17")
+    log_and_print("SM3 gen: priv=3 -> pub=5^3 mod 23 = 10")
+    log_and_print("\nShared session keys (ki):")
+    log_and_print("k1: 8^4 mod 23 = 2")
+    log_and_print("k2: 8^7 mod 23 = 12")
+    log_and_print("k3: 8^3 mod 23 = 6")
+    log_and_print("Total Mask (K) = 2 + 12 + 6 = 20")
+    
+    input("\n[Press Enter to execute Alg 2: FEHH Encryption] ")
+    log_and_print("\n--- Alg 2: FEHH Encryption (SM side) ---")
+    log_and_print("SM1 sends: 3763 + 2  = 3765")
+    log_and_print("SM2 sends: 5067 + 12 = 5079")
+    log_and_print("SM3 sends: 3405 + 6  = 3411")
+    
+    input("\n[Press Enter to execute Alg 3: MIFE Inner Product] ")
+    log_and_print("\n--- Alg 3: MIFE Inner Product (AG side) ---")
+    log_and_print("AG aggregates without seeing true values:")
+    log_and_print("C' = (3765*1) + (5079*1) + (3411*1) = 12255")
+    
+    input("\n[Press Enter to execute Alg 4: LHH Verification] ")
+    log_and_print("\n--- Alg 4: LHH Verification (CC side) ---")
+    log_and_print("h1 = 5^3765 mod 23 = 10")
+    log_and_print("h2 = 5^5079 mod 23 = 7")
+    log_and_print("h3 = 5^3411 mod 23 = 5")
+    log_and_print("h* = 10 * 7 * 5 mod 23 = 5")
+    log_and_print("Check: 5^12255 mod 23 = 5. MATCH! [AG was honest]")
+    
+    input("\n[Press Enter to execute Alg 5: FEHH Decryption] ")
+    log_and_print("\n--- Alg 5: FEHH Decryption ---")
+    log_and_print("C = 12255 - K(20) = 12235")
+    log_and_print("Restored scale: 12235 / 1000 = 12.235 kW")
+    log_and_print("\nMathematical Walkthrough Complete.")
+
+def demo_math_v2():
+    log_and_print("\n" + "="*80)
+    log_and_print("  INTERACTIVE WALKTHROUGH (V2 - Advanced India)")
+    log_and_print("="*80)
+    input("\n[Press Enter to execute Fault Tolerance Demo] ")
+    log_and_print("\n--- Scenario: Meter 2 Goes Offline ---")
+    log_and_print("AG buffer: [SM1_ctx, NONE, SM3_ctx]")
+    log_and_print("AG substitutes TTP Dummy for SM2: [SM1_ctx, DUMMY_ctx, SM3_ctx]")
+    log_and_print("Dummy decrypts to 0. Mask sum adjusted: K = k1 + 0 + k3.")
+    log_and_print("Network continues functioning without crashing.")
+    
+    input("\n[Press Enter to execute Billing Demo] ")
+    log_and_print("\n--- Feeder Billing Demo ---")
+    log_and_print("Decrypted Aggregate: 12.235 kW for 3 users.")
+    log_and_print("Average: 4.078 kW per user.")
+    log_and_print("Applying DERC Tariff Slab 1 (INR 3.00/kWh):")
+    log_and_print("Estimated Feeder Revenue: 4.078 * 3.00 * 3 = INR 36.70")
+    log_and_print("\nMathematical Walkthrough Complete.")
+
 # ─── Runner ───
 def run_mode():
     log_and_print("\n[ Select Execution Mode ]")
@@ -143,14 +209,18 @@ def run_mode():
     
     if choice == '1':
         explain_v1()
-        log_and_print("\n[INFO] Launching V1: Research Demo...", logging.INFO)
+        if input("\nDo you want to see the interactive mathematical calculation demo? (Y/n): ").strip().lower() in ['', 'y', 'yes']:
+            demo_math_v1()
+        log_and_print("\n[INFO] Launching V1: Research Demo (Full Simulation)...", logging.INFO)
         script_dir = Path(__file__).resolve().parent / "v1_research_demo"
         subprocess.run([sys.executable, "main.py"], cwd=script_dir)
         log_and_print("[INFO] V1 Execution completed.", logging.INFO)
         
     elif choice == '2':
         explain_v2()
-        log_and_print("\n[INFO] Launching V2: Advanced India Version...", logging.INFO)
+        if input("\nDo you want to see the interactive fault/billing calculation demo? (Y/n): ").strip().lower() in ['', 'y', 'yes']:
+            demo_math_v2()
+        log_and_print("\n[INFO] Launching V2: Advanced India Version (Full Simulation)...", logging.INFO)
         script_dir = Path(__file__).resolve().parent / "v2_advanced_india"
         subprocess.run([sys.executable, "main.py"], cwd=script_dir)
         log_and_print("[INFO] V2 Execution completed.", logging.INFO)

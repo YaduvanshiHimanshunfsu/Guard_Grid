@@ -1,0 +1,22 @@
+# Guard-Grid V1 – Research Demo dependencies
+#
+# pymife     → Multi-Input Functional Encryption (Damgård scheme).
+#              Provides FeDamgardMulti which implements MIFE.Setup,
+#              MIFE.Enc, MIFE.KeyGen, MIFE.Dec from the paper.
+#
+# gmpy2      → GNU Multiple Precision Arithmetic library (Python bindings).
+#              Used for fast modular exponentiation (powmod), safe-prime
+#              generation, and big-integer random sampling in DH, LHH,
+#              and FEFQ modules.  Easily 100x faster than pure-Python
+#              pow(base, exp, mod) for 512-bit numbers.
+#
+# pandas     → DataFrame-based CSV reader.  Loads the 60k-row dataset
+#              and extracts the p1 column in two lines of code.
+#
+# matplotlib → Generates the benchmark plots (Figures 3–7 equivalents).
+#              Only imported when running `python main.py benchmark`.
+#
+pymife
+gmpy2
+pandas
+matplotlib

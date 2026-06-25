@@ -137,3 +137,234 @@ Exiting GuardGrid Starter. Goodbye!
 2026-06-26 00:19:46 [INFO] [INFO] V2 Execution completed.
 2026-06-26 00:19:50 [INFO] 
 Exiting GuardGrid Starter. Goodbye & Thank You!
+2026-06-26 00:42:54 [INFO] 
+================================================================================
+                      G U A R D   G R I D
+           Privacy-Preserving Smart Meter Data Aggregation
+================================================================================
+
+[ Project Overview ]
+* Goal: Ensuring data privacy and security in smart meter networks.
+* Context: Summer Internship Project.
+* Foundation: Built upon the "Guard Grid" cryptographic research paper.
+* Objective: Evaluating practical feasibility, improving the theoretical
+             solution, and simulating real-world fault tolerance.
+
+[ Team & Mentorship ]
+* Developed by: Himanshu Yadav & A.Tanmayee
+* Under the Guidance of: Dr. Jayshree Gupta (Assistant Professor)
+* Institution: IIIT Allahabad
+
+================================================================================
+    
+2026-06-26 00:42:54 [INFO] [INFO] Checking system dependencies in the background...
+2026-06-26 00:42:54 [INFO] 
+[INFO] Missing libraries detected: pymife
+2026-06-26 00:42:54 [INFO]        Estimated Download Size: ~25 MB
+2026-06-26 00:42:54 [INFO]        Estimated Install Time: ~15 seconds
+2026-06-26 00:42:57 [WARNING] 
+[WARN] Skipping installation. The program might crash if it attempts to use missing libraries.
+2026-06-26 00:42:57 [INFO] 
+[ Select Execution Mode ]
+2026-06-26 00:42:57 [INFO]   1. Run V1: Research Demo
+2026-06-26 00:42:57 [INFO]      - Pure implementation of the research paper model.
+2026-06-26 00:42:57 [INFO]      - Validates theoretical equations with slight improvements.
+2026-06-26 00:42:57 [INFO]   2. Run V2: Advanced India Version
+2026-06-26 00:42:57 [INFO]      - Production-oriented, practical version.
+2026-06-26 00:42:57 [INFO]      - Features fault tolerance, time-series intervals, and billing.
+2026-06-26 00:42:57 [INFO]   3. Exit
+2026-06-26 00:43:02 [INFO] 
+================================================================================
+2026-06-26 00:43:02 [INFO]   PRE-FLIGHT BRIEFING: V1 (RESEARCH DEMO)
+2026-06-26 00:43:02 [INFO] ================================================================================
+2026-06-26 00:43:02 [INFO] What you are about to see is the foundational cryptographic pipeline:
+2026-06-26 00:43:02 [INFO]   1. Setup: The TTP generates 512-bit safe primes, DH keys, and MIFE master keys.
+2026-06-26 00:43:02 [INFO]   2. Encryption: Each Smart Meter locally masks its reading using DH shared
+2026-06-26 00:43:02 [INFO]      secrets, then applies Functional Encryption (MIFE) and Homomorphic Hashing.
+2026-06-26 00:43:02 [INFO]   3. Aggregation: The Gateway (AG) blindly aggregates ciphertexts.
+2026-06-26 00:43:02 [INFO]   4. Verification: The Control Center (CC) uses LHH to cryptographically verify
+2026-06-26 00:43:02 [INFO]      the aggregate hasn't been tampered with, then decrypts the total sum.
+2026-06-26 00:43:02 [INFO]   5. Queries: The CC re-encrypts the aggregate for the Cloud Server
+2026-06-26 00:43:02 [INFO]      to evaluate specific functions blindly.
+2026-06-26 00:43:02 [INFO] ================================================================================
+2026-06-26 00:43:10 [INFO] 
+================================================================================
+2026-06-26 00:43:10 [INFO]   DYNAMIC MATHEMATICAL WALKTHROUGH (V1)
+2026-06-26 00:43:10 [INFO] ================================================================================
+2026-06-26 00:43:16 [INFO] 
+[ Dataset Prepared — 8 Smart Meters ]
+2026-06-26 00:43:16 [INFO]   SM1: 4.174 kW  -> x1 = 4174
+2026-06-26 00:43:16 [INFO]   SM2: 4.186 kW  -> x2 = 4186
+2026-06-26 00:43:16 [INFO]   SM3: 4.413 kW  -> x3 = 4413
+2026-06-26 00:43:16 [INFO]   SM4: 3.456 kW  -> x4 = 3456
+2026-06-26 00:43:16 [INFO]   SM5: 3.109 kW  -> x5 = 3109
+2026-06-26 00:43:16 [INFO]   SM6: 3.578 kW  -> x6 = 3578
+2026-06-26 00:43:16 [INFO]   SM7: 3.048 kW  -> x7 = 3048
+2026-06-26 00:43:16 [INFO]   SM8: 3.630 kW  -> x8 = 3630
+2026-06-26 00:43:24 [INFO] 
+--- Alg 1: DH Key Agreement ---
+2026-06-26 00:43:24 [INFO] CC  gen: priv=16 -> pub=5^16 mod 23 = 3
+2026-06-26 00:43:24 [INFO] SM1 gen: priv=5 -> pub=20
+2026-06-26 00:43:24 [INFO] SM2 gen: priv=7 -> pub=17
+2026-06-26 00:43:24 [INFO] SM3 gen: priv=12 -> pub=18
+2026-06-26 00:43:24 [INFO] SM4 gen: priv=2 -> pub=2
+2026-06-26 00:43:24 [INFO] SM5 gen: priv=3 -> pub=10
+2026-06-26 00:43:24 [INFO] SM6 gen: priv=11 -> pub=22
+2026-06-26 00:43:24 [INFO] SM7 gen: priv=20 -> pub=12
+2026-06-26 00:43:24 [INFO] SM8 gen: priv=17 -> pub=15
+2026-06-26 00:43:24 [INFO] 
+Shared session keys (ki):
+2026-06-26 00:43:24 [INFO] k1: 3^5 mod 23 = 13
+2026-06-26 00:43:24 [INFO] k2: 3^7 mod 23 = 2
+2026-06-26 00:43:24 [INFO] k3: 3^12 mod 23 = 3
+2026-06-26 00:43:24 [INFO] k4: 3^2 mod 23 = 9
+2026-06-26 00:43:24 [INFO] k5: 3^3 mod 23 = 4
+2026-06-26 00:43:24 [INFO] k6: 3^11 mod 23 = 1
+2026-06-26 00:43:24 [INFO] k7: 3^20 mod 23 = 18
+2026-06-26 00:43:24 [INFO] k8: 3^17 mod 23 = 16
+2026-06-26 00:43:24 [INFO] Total Mask (K) = 66
+2026-06-26 00:43:26 [INFO] 
+--- Alg 2: FEHH Encryption (SM side) ---
+2026-06-26 00:43:26 [INFO] SM1 sends: 4174 + 13 = 4187
+2026-06-26 00:43:26 [INFO] SM2 sends: 4186 + 2 = 4188
+2026-06-26 00:43:26 [INFO] SM3 sends: 4413 + 3 = 4416
+2026-06-26 00:43:26 [INFO] SM4 sends: 3456 + 9 = 3465
+2026-06-26 00:43:26 [INFO] SM5 sends: 3109 + 4 = 3113
+2026-06-26 00:43:26 [INFO] SM6 sends: 3578 + 1 = 3579
+2026-06-26 00:43:26 [INFO] SM7 sends: 3048 + 18 = 3066
+2026-06-26 00:43:26 [INFO] SM8 sends: 3630 + 16 = 3646
+2026-06-26 00:43:28 [INFO] 
+--- Alg 3: MIFE Inner Product (AG side) ---
+2026-06-26 00:43:28 [INFO] AG aggregates without seeing true values.
+2026-06-26 00:43:28 [INFO] C' (sum of all ciphertexts) = 29660
+2026-06-26 00:43:29 [INFO] 
+--- Alg 4: LHH Verification (CC side) ---
+2026-06-26 00:43:29 [INFO] h1 = 5^4187 mod 23 = 17
+2026-06-26 00:43:29 [INFO] h2 = 5^4188 mod 23 = 16
+2026-06-26 00:43:29 [INFO] h3 = 5^4416 mod 23 = 3
+2026-06-26 00:43:29 [INFO] h4 = 5^3465 mod 23 = 22
+2026-06-26 00:43:29 [INFO] h5 = 5^3113 mod 23 = 22
+2026-06-26 00:43:29 [INFO] h6 = 5^3579 mod 23 = 19
+2026-06-26 00:43:29 [INFO] h7 = 5^3066 mod 23 = 16
+2026-06-26 00:43:29 [INFO] h8 = 5^3646 mod 23 = 3
+2026-06-26 00:43:29 [INFO] h* (product of hashes mod 23) = 4
+2026-06-26 00:43:29 [INFO] Check: 5^29660 mod 23 = 4.
+2026-06-26 00:43:29 [INFO] MATCH! [AG was honest]
+2026-06-26 00:43:32 [INFO] 
+--- Alg 5: FEHH Decryption ---
+2026-06-26 00:43:32 [INFO] C = 29660 - K(66) = 29594
+2026-06-26 00:43:32 [INFO] Restored scale: 29594 / 1000 = 29.594 kW
+2026-06-26 00:43:32 [INFO] 
+Mathematical Walkthrough Complete.
+2026-06-26 00:43:32 [INFO] 
+[INFO] Launching V1: Research Demo (Full Simulation)...
+2026-06-26 00:43:38 [INFO] [INFO] V1 Execution completed.
+2026-06-26 00:43:43 [INFO] 
+[ Select Execution Mode ]
+2026-06-26 00:43:43 [INFO]   1. Run V1: Research Demo
+2026-06-26 00:43:43 [INFO]      - Pure implementation of the research paper model.
+2026-06-26 00:43:43 [INFO]      - Validates theoretical equations with slight improvements.
+2026-06-26 00:43:43 [INFO]   2. Run V2: Advanced India Version
+2026-06-26 00:43:43 [INFO]      - Production-oriented, practical version.
+2026-06-26 00:43:43 [INFO]      - Features fault tolerance, time-series intervals, and billing.
+2026-06-26 00:43:43 [INFO]   3. Exit
+2026-06-26 00:43:47 [INFO] 
+================================================================================
+2026-06-26 00:43:47 [INFO]   PRE-FLIGHT BRIEFING: V1 (RESEARCH DEMO)
+2026-06-26 00:43:47 [INFO] ================================================================================
+2026-06-26 00:43:47 [INFO] What you are about to see is the foundational cryptographic pipeline:
+2026-06-26 00:43:47 [INFO]   1. Setup: The TTP generates 512-bit safe primes, DH keys, and MIFE master keys.
+2026-06-26 00:43:47 [INFO]   2. Encryption: Each Smart Meter locally masks its reading using DH shared
+2026-06-26 00:43:47 [INFO]      secrets, then applies Functional Encryption (MIFE) and Homomorphic Hashing.
+2026-06-26 00:43:47 [INFO]   3. Aggregation: The Gateway (AG) blindly aggregates ciphertexts.
+2026-06-26 00:43:47 [INFO]   4. Verification: The Control Center (CC) uses LHH to cryptographically verify
+2026-06-26 00:43:47 [INFO]      the aggregate hasn't been tampered with, then decrypts the total sum.
+2026-06-26 00:43:47 [INFO]   5. Queries: The CC re-encrypts the aggregate for the Cloud Server
+2026-06-26 00:43:47 [INFO]      to evaluate specific functions blindly.
+2026-06-26 00:43:47 [INFO] ================================================================================
+2026-06-26 00:43:53 [INFO] 
+================================================================================
+2026-06-26 00:43:53 [INFO]   DYNAMIC MATHEMATICAL WALKTHROUGH (V1)
+2026-06-26 00:43:53 [INFO] ================================================================================
+2026-06-26 00:43:54 [INFO] 
+[ Dataset Prepared — 60000 Smart Meters ]
+2026-06-26 00:43:54 [INFO]   Processed 60000 meters. First value: x1 = 3763
+2026-06-26 00:43:57 [INFO] 
+--- Alg 1: DH Key Agreement ---
+2026-06-26 00:43:57 [INFO] CC  gen: priv=6 -> pub=5^6 mod 23 = 8
+2026-06-26 00:43:57 [INFO] Total Mask (K) = 540880
+2026-06-26 00:43:58 [INFO] 
+--- Alg 2: FEHH Encryption (SM side) ---
+2026-06-26 00:43:58 [INFO]   Encrypted 60000 values. First cipher: 3772
+2026-06-26 00:43:58 [INFO] 
+--- Alg 3: MIFE Inner Product (AG side) ---
+2026-06-26 00:43:58 [INFO] AG aggregates without seeing true values.
+2026-06-26 00:43:58 [INFO] C' (sum of all ciphertexts) = 225510880
+2026-06-26 00:43:59 [INFO] 
+--- Alg 4: LHH Verification (CC side) ---
+2026-06-26 00:43:59 [INFO] h* (product of hashes mod 23) = 18
+2026-06-26 00:43:59 [INFO] Check: 5^225510880 mod 23 = 18.
+2026-06-26 00:43:59 [INFO] MATCH! [AG was honest]
+2026-06-26 00:43:59 [INFO] 
+--- Alg 5: FEHH Decryption ---
+2026-06-26 00:43:59 [INFO] C = 225510880 - K(540880) = 224970000
+2026-06-26 00:43:59 [INFO] Restored scale: 224970000 / 1000 = 224970.000 kW
+2026-06-26 00:43:59 [INFO] 
+Mathematical Walkthrough Complete.
+2026-06-26 00:43:59 [INFO] 
+[INFO] Launching V1: Research Demo (Full Simulation)...
+2026-06-26 00:44:04 [INFO] [INFO] V1 Execution completed.
+2026-06-26 00:44:04 [INFO] 
+[ Select Execution Mode ]
+2026-06-26 00:44:04 [INFO]   1. Run V1: Research Demo
+2026-06-26 00:44:04 [INFO]      - Pure implementation of the research paper model.
+2026-06-26 00:44:04 [INFO]      - Validates theoretical equations with slight improvements.
+2026-06-26 00:44:04 [INFO]   2. Run V2: Advanced India Version
+2026-06-26 00:44:04 [INFO]      - Production-oriented, practical version.
+2026-06-26 00:44:04 [INFO]      - Features fault tolerance, time-series intervals, and billing.
+2026-06-26 00:44:04 [INFO]   3. Exit
+2026-06-26 00:44:07 [INFO] 
+================================================================================
+2026-06-26 00:44:07 [INFO]   PRE-FLIGHT BRIEFING: V2 (ADVANCED INDIA VERSION)
+2026-06-26 00:44:07 [INFO] ================================================================================
+2026-06-26 00:44:07 [INFO] This version simulates a real-world Smart Grid (India RDSS standard):
+2026-06-26 00:44:07 [INFO]   1. Time-Series: Processing a full day of data (96 slots of 15-minute intervals).
+2026-06-26 00:44:07 [INFO]   2. Fault Tolerance: We inject random meter failures. The system automatically
+2026-06-26 00:44:07 [INFO]      substitutes pre-generated 'dummy ciphertexts' so the network doesn't crash.
+2026-06-26 00:44:07 [INFO]   3. Anomaly Detection: A rolling z-score monitor tracks the decrypted
+2026-06-26 00:44:07 [INFO]      aggregates to detect power spikes or potential theft.
+2026-06-26 00:44:07 [INFO]   4. Credit Scoring: The Gateway earns or loses reputation points based on
+2026-06-26 00:44:07 [INFO]      the cryptographic verification of its aggregations.
+2026-06-26 00:44:07 [INFO]   5. Billing: The system calculates estimated feeder-level revenue using
+2026-06-26 00:44:07 [INFO]      the official 3-slab DERC domestic tariff (Delhi).
+2026-06-26 00:44:07 [INFO] ================================================================================
+2026-06-26 00:44:12 [INFO] 
+================================================================================
+2026-06-26 00:44:12 [INFO]   DYNAMIC WALKTHROUGH (V2 - Advanced India)
+2026-06-26 00:44:12 [INFO] ================================================================================
+2026-06-26 00:44:19 [INFO] 
+[ Working with 3 Smart Meters ]
+2026-06-26 00:44:19 [INFO]   SM1: 3.091 kW
+2026-06-26 00:44:19 [INFO]   SM2: 2.986 kW
+2026-06-26 00:44:19 [INFO]   SM3: 2.762 kW
+2026-06-26 00:44:23 [INFO] 
+--- Scenario: Random Meter Goes Offline ---
+2026-06-26 00:44:23 [INFO] WARNING: SM1 suddenly lost connection!
+2026-06-26 00:44:23 [INFO] AG detects missing ciphertext. Submitting request to TTP for dummy.
+2026-06-26 00:44:23 [INFO] AG substitutes TTP Dummy for SM1.
+2026-06-26 00:44:23 [INFO] Dummy decrypts to 0 kW. Mask sum dynamically adjusted by CC.
+2026-06-26 00:44:23 [INFO] Decrypted Aggregate without SM1 = 5.749 kW
+2026-06-26 00:44:23 [INFO] Network continues functioning without crashing.
+2026-06-26 00:44:29 [INFO] 
+--- Feeder Billing Demo (DERC Slabs) ---
+2026-06-26 00:44:29 [INFO] Average consumption for online meters: 2.874 kW
+2026-06-26 00:44:29 [INFO] Applying DERC Tariff:
+2026-06-26 00:44:29 [INFO] Slab Rate: INR 4.50 / kWh
+2026-06-26 00:44:29 [INFO] Estimated Feeder Revenue: 5.749 * 4.50 = INR 25.87
+2026-06-26 00:44:29 [INFO] 
+Dynamic Walkthrough Complete.
+2026-06-26 00:44:29 [INFO] 
+[INFO] Launching V2: Advanced India Version (Full Simulation)...
+2026-06-26 00:44:36 [INFO] [INFO] V2 Execution completed.
+2026-06-26 00:44:40 [INFO] 
+Exiting GuardGrid Starter. Goodbye!

@@ -313,18 +313,43 @@ def run_mode():
         explain_v1()
         if input("\nDo you want to see the interactive mathematical calculation demo? (Y/n): ").strip().lower() in ['', 'y', 'yes']:
             demo_math_v1()
-        log_and_print("\n[INFO] Launching V1: Research Demo (Full Simulation)...", logging.INFO)
+            
+        log_and_print("\n[ Select V1 Execution Profile ]")
+        log_and_print("  1. Standard Simulation")
+        log_and_print("  2. LHH Verification Failure (Tamper Demo)")
+        log_and_print("  3. Security Parameter Sweep (Benchmark)")
+        v1_choice = input("\nEnter your choice (1/2/3): ").strip()
+        
+        log_and_print("\n[INFO] Launching V1: Research Demo...", logging.INFO)
         script_dir = Path(__file__).resolve().parent / "v1_research_demo"
-        subprocess.run([sys.executable, "main.py"], cwd=script_dir)
+        
+        if v1_choice == '2':
+            subprocess.run([sys.executable, "main.py", "--tamper"], cwd=script_dir)
+        elif v1_choice == '3':
+            subprocess.run([sys.executable, "main.py", "sweep"], cwd=script_dir)
+        else:
+            subprocess.run([sys.executable, "main.py"], cwd=script_dir)
+            
         log_and_print("[INFO] V1 Execution completed.", logging.INFO)
         
     elif choice == '2':
         explain_v2()
         if input("\nDo you want to see the interactive fault/billing calculation demo? (Y/n): ").strip().lower() in ['', 'y', 'yes']:
             demo_math_v2()
-        log_and_print("\n[INFO] Launching V2: Advanced India Version (Full Simulation)...", logging.INFO)
+            
+        log_and_print("\n[ Select V2 Execution Profile ]")
+        log_and_print("  1. Standard 1-Day Simulation")
+        log_and_print("  2. Multi-Day Power Theft & Anomaly Demo (3 days, SM_2 hacked)")
+        v2_choice = input("\nEnter your choice (1/2): ").strip()
+        
+        log_and_print("\n[INFO] Launching V2: Advanced India Version...", logging.INFO)
         script_dir = Path(__file__).resolve().parent / "v2_advanced_india"
-        subprocess.run([sys.executable, "main.py"], cwd=script_dir)
+        
+        if v2_choice == '2':
+            subprocess.run([sys.executable, "main.py", "--days", "3", "--theft-meter", "2"], cwd=script_dir)
+        else:
+            subprocess.run([sys.executable, "main.py"], cwd=script_dir)
+            
         log_and_print("[INFO] V2 Execution completed.", logging.INFO)
         
     elif choice == '3':

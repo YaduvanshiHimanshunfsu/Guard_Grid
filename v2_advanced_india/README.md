@@ -14,6 +14,13 @@ To bridge the gap between cryptographic theory and practical deployment, V2 intr
 * **Time-Series Pipeline:** A continuous processing loop simulating a full 24-hour cycle, buffering and aggregating encrypted data at standard 15-minute intervals.
 * **Statistical Anomaly Detection:** A rolling z-score layer on the Control Center to monitor decrypted neighborhood aggregates for sudden spikes or drops, flagging potential anomalies without exposing individual houses.
 
+### Example: Fault Tolerance in Practice
+To perfectly illustrate our solution to the "Fragility to Offline Meters" problem, consider a 3-meter scenario where **SM1** suddenly loses connection:
+1. **The Problem:** The Aggregation Gateway (AG) receives ciphertexts from SM2 and SM3, but its MIFE aggregation buffer is incomplete. Under the original protocol, the system would immediately crash.
+2. **The Substitution:** The AG detects the missing ciphertext, pulls a pre-generated Dummy Ciphertext from the TTP, and substitutes it into SM1's slot.
+3. **The Decryption:** The dummy ciphertext decrypts to exactly 0 kW. Knowing SM1 was offline, the Control Center dynamically adjusts the master decryption mask ($K$) by safely dropping SM1's session key ($k_1$).
+4. **The Outcome:** The network successfully decrypts the remaining aggregate (e.g., 5.749 kW from SM2 and SM3) without ever exposing their individual readings. The billing and aggregation pipeline continues functioning without interruption.
+
 ## Goal
 To prove that privacy-preserving functional encryption can be deployed in a volatile, high-latency smart grid environment without sacrificing system stability or necessary utility operations like revenue calculation.
 

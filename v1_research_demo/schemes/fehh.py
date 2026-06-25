@@ -228,9 +228,10 @@ def fehh_agg(enc_results: list[dict], params: dict) -> dict:
     ctx_list = [r["ctx"] for r in enc_results]
 
     # MIFE decryption → masked aggregate C'.
-    # Bound computation: each masked value ≤ 16,000.
+    # Bound computation: each masked value ≤ 6000 + MASK_BOUND.
     n = len(enc_results)
-    max_per_sm = 16_000
+    from crypto.dh import MASK_BOUND
+    max_per_sm = 6_000 + MASK_BOUND
     bound = (0, n * max_per_sm)
     C_prime = mife.decrypt(master_key, ctx_list, sk_y, bound)
 

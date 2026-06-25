@@ -169,3 +169,18 @@ class ControlCenter:
         tuple[int, int] – the FEFQ ciphertext (c1, c2).
         """
         return fefq_encrypt(aggregate, self.fefq_params)
+
+    def generate_function_key(self, a: int, b: int) -> dict:
+        """Generate a function key for the Cloud Server to evaluate f(x) = a·x + b.
+
+        Parameters
+        ----------
+        a : int – multiplicative coefficient.
+        b : int – additive constant.
+
+        Returns
+        -------
+        dict – the function key containing a, b, and sk.
+        """
+        from crypto.fefq import fefq_keygen
+        return fefq_keygen(self.fefq_params, a, b)

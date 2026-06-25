@@ -72,7 +72,7 @@ class AnomalyDetector:
         # Avoid division by zero if all historical values are identical
         if std_dev < 1e-6:
             if abs(value - mean) > 1e-6:
-                z_score = float('inf') # Definite anomaly if it deviates from a constant history
+                z_score = 1e9 # Definite anomaly if it deviates from a constant history
                 is_anomaly = True
             else:
                 z_score = 0.0
@@ -84,9 +84,9 @@ class AnomalyDetector:
         expected_range = (mean - self._threshold * std_dev, mean + self._threshold * std_dev)
 
         if is_anomaly:
-            msg = f"⚠ ANOMALY: {value:.2f} deviates significantly from expected {mean:.2f} ± {self._threshold * std_dev:.2f} (z-score: {z_score:.2f})"
+            msg = f"[ANOMALY]: {value:.2f} deviates significantly from expected {mean:.2f} ± {self._threshold * std_dev:.2f} (z-score: {z_score:.2f})"
         else:
-            msg = f"✓ Normal: {value:.2f} is within expected {mean:.2f} ± {self._threshold * std_dev:.2f}"
+            msg = f"[NORMAL]: {value:.2f} is within expected {mean:.2f} ± {self._threshold * std_dev:.2f}"
 
         return AnomalyResult(
             is_anomaly=is_anomaly,

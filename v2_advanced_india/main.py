@@ -53,11 +53,27 @@ def run_simulation(n_users: int, faults: int) -> None:
         sm = SmartMeter(i, sm_keys["sm_dh_private"], sm_keys["cc_dh_public"], fehh_params)
         smart_meters.append(sm)
 
-    ag = AggregationGateway(fehh_params, sys_params["backup_ciphertexts"])
+    ag_keys = ttp.get_ag_keys()
+    ag = AggregationGateway(ag_keys, sys_params["backup_ciphertexts"])
     
     fault_handler = FaultHandler(n_users)
     credit_tracker = CreditTracker()
     anomaly_detector = AnomalyDetector()
+
+    # ── Precompute Session Keys (Phase 1) ──
+    print("\n[Phase 1] Precomputing CC DH Session Keys for efficiency...")
+    t0_sk = time.perf_counter()
+    from crypto.dh import generate_session_key
+    session_keys = []
+    dh_p, dh_g = fehh_params["dh_p"], fehh_params["dh_g"]
+    cc_keys = fehh_params["cc_keys"]
+    sm_dh_publics = sys_params["sm_dh_publics"]
+    for i in range(n_users):
+        cc_priv, _ = cc_keys[i]
+        sm_pub = sm_dh_publics[i]
+        ki = generate_session_key(cc_priv, sm_pub, dh_p, dh_g)
+        session_keys.append(ki)
+    print(f"          Done in {time.perf_counter() - t0_sk:.3f}s.")
 
     # ── Load Time-Series Data ──
     print(f"\n[Data]    Loading time-series data for {n_users} users...")
@@ -89,12 +105,8 @@ def run_simulation(n_users: int, faults: int) -> None:
         # 4. Aggregation and Verification
         # In V2, aggregate_time_slot handles AG aggregation and CC verification/decryption.
         # It needs enc_results which in our OOP model the AG already collected.
-        # We will extract it from the AG to pass to the scheme, simulating the network transfer.
-        enc_results = ag._collected
-        agg_res = aggregate_time_slot(slot, enc_results, sys_params, SCALE)
-        
-        # Reset AG buffer manually since we intercepted it
-        ag._collected = [None] * n_users
+        enc_results = ag.flush_collected()
+        agg_res = aggregate_time_slot(slot, enc_results, sys_params, session_keys, SCALE)
         
         # 5. Credit Scoring
         credit_tracker.record_round(ag_id, agg_res["verified"])
@@ -134,10 +146,20 @@ def run_simulation(n_users: int, faults: int) -> None:
     print("=" * 80)
     
     # Check if there were any alerts
-    # Let's check the last round as an example, or overall history
+    # Pull the worst-case round from fault_handler.get_history()
     hist = fault_handler.get_history()
-    max_offline = max(h["offline_count"] for h in hist)
-    alert = fault_handler.check_alert([False]*max_offline + [True]*(n_users - max_offline))
+    if hist:
+        worst_round = max(hist, key=lambda h: h["offline_count"])
+        max_offline = worst_round["offline_count"]
+        # Reconstruct the mask for the worst round to feed into check_alert
+        # (False means offline)
+        worst_mask = [True] * n_users
+        for idx in worst_round["offline_indices"]:
+            worst_mask[idx] = False
+        alert = fault_handler.check_alert(worst_mask)
+    else:
+        max_offline = 0
+        alert = fault_handler.check_alert([True] * n_users)
     
     print(f"  Faults:       Max {max_offline} meters offline in a single round.")
     if alert.alert:

@@ -79,8 +79,9 @@ def run_simulation(n: int = N_USERS) -> None:
         )
         smart_meters.append(sm)
 
-    # Create the Aggregation Gateway — gets FEHH public params.
-    ag = AggregationGateway(fehh_params)
+    # Create the Aggregation Gateway — gets FEHH public params and sk_y.
+    ag_keys = ttp.get_ag_keys()
+    ag = AggregationGateway(ag_keys)
 
     # Create the Control Center — gets CC's DH keys, SM public keys,
     # and the FEFQ params for cloud encryption.
@@ -96,9 +97,9 @@ def run_simulation(n: int = N_USERS) -> None:
         scale=SCALE,
     )
 
-    # Create the Cloud Server — in simulation it gets the full FEFQ params.
+    # Create the Cloud Server — receives only public FEFQ params.
     cloud_keys = ttp.get_cloud_keys()
-    cloud = CloudServer(sys_params["fefq_params"])
+    cloud = CloudServer(cloud_keys["fefq_public"])
 
     # ─────────────────────────────────────────────────────────────────────
     # Load dataset
@@ -166,7 +167,8 @@ def run_simulation(n: int = N_USERS) -> None:
     print("           Cloud answering function queries:")
     for label, a, b in queries:
         t0 = time.perf_counter()
-        result = cloud.query(a=a, b=b)
+        fk = cc.generate_function_key(a, b)
+        result = cloud.query(a=a, b=b, fk=fk)
         t_q = time.perf_counter() - t0
         print(f"             f(x) = {label:20s}  =>  {result}  ({t_q*1000:.2f} ms)")
 

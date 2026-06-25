@@ -15,14 +15,14 @@ from schemes.fehh_threshold import fehh_agg_threshold
 class AggregationGateway:
     """Simulates the aggregation gateway with fault tolerance."""
 
-    def __init__(self, fehh_params: dict, backup_ciphertexts: list[dict]):
+    def __init__(self, ag_keys: dict, backup_ciphertexts: list[dict]):
         """
         Parameters
         ----------
-        fehh_params        : dict – output of fehh_setup.
+        ag_keys            : dict – output of ttp.get_ag_keys().
         backup_ciphertexts : list[dict] – from TTP setup.
         """
-        self.fehh_params = fehh_params
+        self.ag_keys = ag_keys
         self.backup_ciphertexts = backup_ciphertexts
         
         # Determine number of expected slots
@@ -40,6 +40,16 @@ class AggregationGateway:
         """
         self._collected[slot_index] = enc_result
 
+    def flush_collected(self) -> list[dict | None]:
+        """Safely return and reset the collected ciphertexts buffer.
+
+        Used by the main loop to simulate the AG receiving all data
+        and passing it along, without exposing internal state directly.
+        """
+        collected = self._collected
+        self._collected = [None] * self.n_users
+        return collected
+
     def aggregate(self) -> dict:
         """Run FEHH threshold aggregation.
 
@@ -52,7 +62,7 @@ class AggregationGateway:
         dict – {C_prime, h_star, online_mask, n_online, n_offline}
         """
         # Run threshold aggregation
-        result = fehh_agg_threshold(self._collected, self.backup_ciphertexts, self.fehh_params)
+        result = fehh_agg_threshold(self._collected, self.backup_ciphertexts, self.ag_keys)
         
         # Clear buffer for next round
         self._collected = [None] * self.n_users

@@ -21,8 +21,12 @@ class GuardGridConfig:
 
     Extends V1's config with India-specific parameters.
 
-    WARNING: 512-bit primes are for simulation only.
-             Production deployments require >= 2048 bits.
+    ===================================================================
+    WARNING: The 512-bit primes are NOT cryptographically secure for
+    real deployment. Production systems MUST use at least 2048 bits
+    for discrete-log based cryptography. We use 512 purely so
+    benchmarks finish in reasonable wall-clock time on a laptop.
+    ===================================================================
     """
 
     # ── Crypto params (same as V1) ──

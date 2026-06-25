@@ -47,19 +47,19 @@ issue per-query keys instead.
 
 from __future__ import annotations
 
-from crypto.fefq import fefq_keygen, fefq_decrypt
+from crypto.fefq import fefq_decrypt
 
 
 class CloudServer:
     """Simulates the cloud server that answers function queries."""
 
-    def __init__(self, fefq_params: dict):
+    def __init__(self, fefq_public: dict):
         """
         Parameters
         ----------
-        fefq_params : dict – full FEFQ params (in simulation includes sk).
+        fefq_public : dict – FEFQ public params (p, g, pk).
         """
-        self.fefq_params = fefq_params
+        self.fefq_public = fefq_public
         self.stored_ct: tuple[int, int] | None = None
 
     def store(self, ct: tuple[int, int]) -> None:
@@ -74,17 +74,16 @@ class CloudServer:
         """
         self.stored_ct = ct
 
-    def query(self, a: int = 1, b: int = 0) -> int:
+    def query(self, a: int, b: int, fk: dict) -> int:
         """Evaluate f(x) = a·x + b on the stored ciphertext.
 
-        Derives a function key for the specific (a, b) pair, then runs
-        FEFQ decryption to get the result.  The Cloud sees f(C) but
-        not C itself (with the caveats noted in the module docstring).
+        Runs FEFQ decryption using the function key provided by the CC.
 
         Parameters
         ----------
-        a : int – multiplicative coefficient (default 1).
-        b : int – additive constant (default 0).
+        a : int – multiplicative coefficient.
+        b : int – additive constant.
+        fk : dict – function key provided by the CC.
 
         Returns
         -------
@@ -97,5 +96,4 @@ class CloudServer:
         if self.stored_ct is None:
             raise RuntimeError("No ciphertext stored.  Call store() first.")
 
-        fk = fefq_keygen(self.fefq_params, a=a, b=b)
-        return fefq_decrypt(self.stored_ct, fk, self.fefq_params)
+        return fefq_decrypt(self.stored_ct, fk, self.fefq_public)

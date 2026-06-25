@@ -42,8 +42,8 @@ def tariff_profile_derc_2024() -> dict:
     return {
         "slabs": [
             {"lo": 0, "hi": 200, "rate": 3.00},
-            {"lo": 201, "hi": 400, "rate": 4.50},
-            {"lo": 401, "hi": float("inf"), "rate": 6.50},
+            {"lo": 200, "hi": 400, "rate": 4.50},
+            {"lo": 400, "hi": float("inf"), "rate": 6.50},
         ],
         "fixed_charge": 125.0,
         "currency": "INR",

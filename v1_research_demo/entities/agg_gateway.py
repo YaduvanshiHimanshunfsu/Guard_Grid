@@ -50,14 +50,14 @@ from schemes.fehh import fehh_agg
 class AggregationGateway:
     """Simulates the aggregation gateway."""
 
-    def __init__(self, fehh_params: dict):
+    def __init__(self, ag_keys: dict):
         """
         Parameters
         ----------
-        fehh_params : dict – output of fehh_setup.
-                      Needs: mife, master_key, sk_y, lhh_p, lhh_g.
+        ag_keys : dict – output of ttp.get_ag_keys().
+                  Needs: mife, master_key, sk_y, lhh_p, lhh_g.
         """
-        self.fehh_params = fehh_params
+        self.fehh_params = ag_keys
         self._collected: list[dict] = []
 
     def receive(self, enc_result: dict) -> None:

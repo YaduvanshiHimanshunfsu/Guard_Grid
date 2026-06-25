@@ -32,10 +32,14 @@ class GuardGridConfig:
     """Immutable project-wide settings.
 
     These defaults are deliberately small to keep setup and encryption
-    times within seconds, not minutes.  The 512-bit primes are NOT
-    cryptographically secure for real deployment — production systems
-    need at least 2048 bits.  We use 512 purely so benchmarks finish
-    in reasonable wall-clock time on a laptop.
+    times within seconds, not minutes.
+
+    ===================================================================
+    WARNING: The 512-bit primes are NOT cryptographically secure for
+    real deployment. Production systems MUST use at least 2048 bits
+    for discrete-log based cryptography. We use 512 purely so
+    benchmarks finish in reasonable wall-clock time on a laptop.
+    ===================================================================
 
     Attributes
     ----------

@@ -187,9 +187,10 @@ def dh_agree(x_i: int, g_xj: int, p: int,
 # Session key derivation (used by SM and CC in FEHH.Enc / FEHH.Dec)
 # ──────────────────────────────────────────────────────────────────────────────
 
-# Upper bound for the session key mask.
-# See the module docstring for why this is necessary.
-MASK_BOUND = 10_000
+# In FEHH, the session key ki masks the smart meter reading: m = x + ki.
+# To keep the sum Σ mi reasonably small for the MIFE BSGS decryptor,
+# we bound ki. 10**9 provides decent entropy while keeping the sum tractable.
+MASK_BOUND = 10**9
 
 
 def generate_session_key(cc_private: int, sm_public: int,

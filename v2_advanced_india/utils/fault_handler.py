@@ -79,14 +79,14 @@ class FaultHandler:
         offline_pct = offline_count / len(online_mask)
 
         if offline_pct > self.max_offline_pct:
-            msg = (f"⚠ ALERT: {offline_count}/{len(online_mask)} meters offline "
+            msg = (f"[ALERT]: {offline_count}/{len(online_mask)} meters offline "
                    f"({offline_pct:.0%}) — exceeds {self.max_offline_pct:.0%} threshold. "
                    f"Possible coordinated attack on feeder.")
         elif offline_count > 0:
-            msg = (f"ℹ {offline_count}/{len(online_mask)} meters offline "
+            msg = (f"[INFO]: {offline_count}/{len(online_mask)} meters offline "
                    f"({offline_pct:.0%}) — within tolerance.")
         else:
-            msg = "✓ All meters online."
+            msg = "[OK]: All meters online."
 
         return FaultAlert(
             alert=offline_pct > self.max_offline_pct,

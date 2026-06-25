@@ -381,5 +381,17 @@ Summary: For academic use, the current system is fine. For any production deploy
 - Ministry of Power. "Revamped Distribution Sector Scheme (RDSS) Operational Guidelines, 2021."
 - CEA. "Central Electricity Authority Metering Regulations, 2006 (as amended)."
 - Agrawal, S., Libert, B., Stehlé, D. "Fully Secure Functional Encryption for Inner Products, from Standard Assumptions." CRYPTO 2016.
-- Gunduz, M.Z. and Das, R. "Cybersecurity on Smart Grid Systems." Internet of Things. 2020.
 - Bernstein, D.J. and Lange, T. "Post-quantum cryptography." Nature, 549, 188–194. 2017.
+
+---
+
+## 12. Proof of Concept: Differential Privacy Noise Preview
+
+While V3 is largely conceptual, a standalone utility can be developed to demonstrate the mathematical effect of Differential Privacy (DP) noise on smart meter readings prior to full system integration. 
+
+This utility (e.g., `dp_preview.py`) would:
+1. Inject **Laplace noise** (`noise = Laplace(0, sensitivity/epsilon)`) into raw smart meter readings.
+2. Demonstrate how individual readings are obscured by the noise bound (e.g., ±5 kW).
+3. Validate that the aggregate error shrinks as the number of meters increases (due to the law of large numbers), preserving feeder-level billing accuracy while mathematically guaranteeing individual privacy. 
+
+This serves as a bridge between the V2 architecture and the proposed V3 privacy enhancements, allowing stakeholders to visualize the accuracy vs. privacy trade-off defined by the `epsilon` parameter.

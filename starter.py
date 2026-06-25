@@ -94,6 +94,40 @@ def install_dependencies(missing_libs: list):
     else:
         log_and_print("\n[WARN] Skipping installation. The program might crash if it attempts to use missing libraries.", logging.WARNING)
 
+# ─── Presentation & Visualization ───
+def explain_v1():
+    log_and_print("\n" + "="*80)
+    log_and_print("  PRE-FLIGHT BRIEFING: V1 (RESEARCH DEMO)")
+    log_and_print("="*80)
+    log_and_print("What you are about to see is the foundational cryptographic pipeline:")
+    log_and_print("  1. Setup: The TTP generates 512-bit safe primes, DH keys, and MIFE master keys.")
+    log_and_print("  2. Encryption: Each Smart Meter locally masks its reading using DH shared")
+    log_and_print("     secrets, then applies Functional Encryption (MIFE) and Homomorphic Hashing.")
+    log_and_print("  3. Aggregation: The Gateway (AG) blindly aggregates ciphertexts.")
+    log_and_print("  4. Verification: The Control Center (CC) uses LHH to cryptographically verify")
+    log_and_print("     the aggregate hasn't been tampered with, then decrypts the total sum.")
+    log_and_print("  5. Queries: The CC re-encrypts the aggregate for the Cloud Server")
+    log_and_print("     to evaluate specific functions blindly.")
+    log_and_print("="*80)
+    input("Press Enter to begin the V1 simulation... ")
+
+def explain_v2():
+    log_and_print("\n" + "="*80)
+    log_and_print("  PRE-FLIGHT BRIEFING: V2 (ADVANCED INDIA VERSION)")
+    log_and_print("="*80)
+    log_and_print("This version simulates a real-world Smart Grid (India RDSS standard):")
+    log_and_print("  1. Time-Series: Processing a full day of data (96 slots of 15-minute intervals).")
+    log_and_print("  2. Fault Tolerance: We inject random meter failures. The system automatically")
+    log_and_print("     substitutes pre-generated 'dummy ciphertexts' so the network doesn't crash.")
+    log_and_print("  3. Anomaly Detection: A rolling z-score monitor tracks the decrypted")
+    log_and_print("     aggregates to detect power spikes or potential theft.")
+    log_and_print("  4. Credit Scoring: The Gateway earns or loses reputation points based on")
+    log_and_print("     the cryptographic verification of its aggregations.")
+    log_and_print("  5. Billing: The system calculates estimated feeder-level revenue using")
+    log_and_print("     the official 3-slab DERC domestic tariff (Delhi).")
+    log_and_print("="*80)
+    input("Press Enter to begin the V2 full-day simulation... ")
+
 # ─── Runner ───
 def run_mode():
     log_and_print("\n[ Select Execution Mode ]")
@@ -108,12 +142,14 @@ def run_mode():
     choice = input("\nEnter your choice (1/2/3): ").strip()
     
     if choice == '1':
+        explain_v1()
         log_and_print("\n[INFO] Launching V1: Research Demo...", logging.INFO)
         script_dir = Path(__file__).resolve().parent / "v1_research_demo"
         subprocess.run([sys.executable, "main.py"], cwd=script_dir)
         log_and_print("[INFO] V1 Execution completed.", logging.INFO)
         
     elif choice == '2':
+        explain_v2()
         log_and_print("\n[INFO] Launching V2: Advanced India Version...", logging.INFO)
         script_dir = Path(__file__).resolve().parent / "v2_advanced_india"
         subprocess.run([sys.executable, "main.py"], cwd=script_dir)

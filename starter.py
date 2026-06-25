@@ -8,10 +8,12 @@
 import os
 import sys
 import time
+import random
 import logging
 import subprocess
 import importlib.util
 from pathlib import Path
+import pandas as pd
 
 # ─── Setup Logging ───
 LOG_DIR = Path("logs")
@@ -130,69 +132,169 @@ def explain_v2():
 
 def demo_math_v1():
     log_and_print("\n" + "="*80)
-    log_and_print("  INTERACTIVE MATHEMATICAL WALKTHROUGH (V1)")
+    log_and_print("  DYNAMIC MATHEMATICAL WALKTHROUGH (V1)")
     log_and_print("="*80)
-    log_and_print("Using toy primes (p=23, g=5) to show the exact math under the hood.")
-    log_and_print("\n[ Dataset — Rows 0, 1, 2 ]")
-    log_and_print("  SM1: 3.763 kW  -> x1 = 3763")
-    log_and_print("  SM2: 5.067 kW  -> x2 = 5067")
-    log_and_print("  SM3: 3.405 kW  -> x3 = 3405")
     
+    choice = input("\nSelect Data Source for Demo:\n1. Random sample (3-10 meters) from CSV\n2. Use full dataset (~60,000 meters)\nEnter choice (1/2): ").strip()
+    
+    csv_path = Path(__file__).resolve().parent / "shared" / "smart_grid_stability_augmented.csv"
+    if not csv_path.exists():
+        log_and_print(f"[ERROR] Dataset not found at {csv_path}", logging.ERROR)
+        return
+        
+    df = pd.read_csv(csv_path)
+    
+    if choice == '1':
+        n = random.randint(3, 10)
+        df_sample = df.sample(n).reset_index(drop=True)
+        readings = (df_sample['p1'] * 1000).astype(int).tolist()
+    else:
+        n = len(df)
+        readings = (df['p1'] * 1000).astype(int).tolist()
+        
+    p, g = 23, 5
+    cc_priv = random.randint(2, 20)
+    cc_pub = pow(g, cc_priv, p)
+    
+    log_and_print(f"\n[ Dataset Prepared — {n} Smart Meters ]")
+    if choice == '1':
+        for i, val in enumerate(readings):
+            log_and_print(f"  SM{i+1}: {(val/1000):.3f} kW  -> x{i+1} = {val}")
+    else:
+        log_and_print(f"  Processed {n} meters. First value: x1 = {readings[0]}")
+        
     input("\n[Press Enter to execute Alg 1: DH Key Agreement] ")
     log_and_print("\n--- Alg 1: DH Key Agreement ---")
-    log_and_print("CC  gen: priv=6 -> pub=5^6 mod 23 = 8")
-    log_and_print("SM1 gen: priv=4 -> pub=5^4 mod 23 = 4")
-    log_and_print("SM2 gen: priv=7 -> pub=5^7 mod 23 = 17")
-    log_and_print("SM3 gen: priv=3 -> pub=5^3 mod 23 = 10")
-    log_and_print("\nShared session keys (ki):")
-    log_and_print("k1: 8^4 mod 23 = 2")
-    log_and_print("k2: 8^7 mod 23 = 12")
-    log_and_print("k3: 8^3 mod 23 = 6")
-    log_and_print("Total Mask (K) = 2 + 12 + 6 = 20")
+    log_and_print(f"CC  gen: priv={cc_priv} -> pub={g}^{cc_priv} mod {p} = {cc_pub}")
+    
+    sm_privs = [random.randint(2, 20) for _ in range(n)]
+    sm_pubs = [pow(g, priv, p) for priv in sm_privs]
+    session_keys = [pow(cc_pub, priv, p) for priv in sm_privs]
+    
+    if choice == '1':
+        for i in range(n):
+            log_and_print(f"SM{i+1} gen: priv={sm_privs[i]} -> pub={sm_pubs[i]}")
+        log_and_print("\nShared session keys (ki):")
+        for i in range(n):
+            log_and_print(f"k{i+1}: {cc_pub}^{sm_privs[i]} mod {p} = {session_keys[i]}")
+            
+    total_mask = sum(session_keys)
+    log_and_print(f"Total Mask (K) = {total_mask}")
     
     input("\n[Press Enter to execute Alg 2: FEHH Encryption] ")
     log_and_print("\n--- Alg 2: FEHH Encryption (SM side) ---")
-    log_and_print("SM1 sends: 3763 + 2  = 3765")
-    log_and_print("SM2 sends: 5067 + 12 = 5079")
-    log_and_print("SM3 sends: 3405 + 6  = 3411")
-    
+    ciphertexts = [readings[i] + session_keys[i] for i in range(n)]
+    if choice == '1':
+        for i in range(n):
+            log_and_print(f"SM{i+1} sends: {readings[i]} + {session_keys[i]} = {ciphertexts[i]}")
+    else:
+        log_and_print(f"  Encrypted {n} values. First cipher: {ciphertexts[0]}")
+        
     input("\n[Press Enter to execute Alg 3: MIFE Inner Product] ")
     log_and_print("\n--- Alg 3: MIFE Inner Product (AG side) ---")
-    log_and_print("AG aggregates without seeing true values:")
-    log_and_print("C' = (3765*1) + (5079*1) + (3411*1) = 12255")
+    c_prime = sum(ciphertexts)
+    log_and_print("AG aggregates without seeing true values.")
+    log_and_print(f"C' (sum of all ciphertexts) = {c_prime}")
     
     input("\n[Press Enter to execute Alg 4: LHH Verification] ")
     log_and_print("\n--- Alg 4: LHH Verification (CC side) ---")
-    log_and_print("h1 = 5^3765 mod 23 = 10")
-    log_and_print("h2 = 5^5079 mod 23 = 7")
-    log_and_print("h3 = 5^3411 mod 23 = 5")
-    log_and_print("h* = 10 * 7 * 5 mod 23 = 5")
-    log_and_print("Check: 5^12255 mod 23 = 5. MATCH! [AG was honest]")
+    hashes = [pow(g, ct, p) for ct in ciphertexts]
+    h_star = 1
+    for h in hashes:
+        h_star = (h_star * h) % p
+        
+    verify_val = pow(g, c_prime, p)
+    if choice == '1':
+        for i in range(n):
+            log_and_print(f"h{i+1} = {g}^{ciphertexts[i]} mod {p} = {hashes[i]}")
     
+    log_and_print(f"h* (product of hashes mod {p}) = {h_star}")
+    log_and_print(f"Check: {g}^{c_prime} mod {p} = {verify_val}.")
+    if verify_val == h_star:
+        log_and_print("MATCH! [AG was honest]")
+    else:
+        log_and_print("MISMATCH! [Tampering detected]")
+        
     input("\n[Press Enter to execute Alg 5: FEHH Decryption] ")
     log_and_print("\n--- Alg 5: FEHH Decryption ---")
-    log_and_print("C = 12255 - K(20) = 12235")
-    log_and_print("Restored scale: 12235 / 1000 = 12.235 kW")
+    c_final = c_prime - total_mask
+    log_and_print(f"C = {c_prime} - K({total_mask}) = {c_final}")
+    log_and_print(f"Restored scale: {c_final} / 1000 = {c_final / 1000:.3f} kW")
     log_and_print("\nMathematical Walkthrough Complete.")
 
 def demo_math_v2():
     log_and_print("\n" + "="*80)
-    log_and_print("  INTERACTIVE WALKTHROUGH (V2 - Advanced India)")
+    log_and_print("  DYNAMIC WALKTHROUGH (V2 - Advanced India)")
     log_and_print("="*80)
+    
+    mode = input("\nSelect Input Method:\n1. Use randomly sampled CSV dataset\n2. Manual Input (max 10 meters)\nEnter choice (1/2): ").strip()
+    
+    if mode == '1':
+        csv_path = Path(__file__).resolve().parent / "shared" / "smart_grid_stability_augmented.csv"
+        try:
+            df = pd.read_csv(csv_path)
+            n = random.randint(3, 10)
+            df_sample = df.sample(n).reset_index(drop=True)
+            readings = df_sample['p1'].tolist()
+        except Exception:
+            log_and_print("[ERROR] CSV failed to load. Falling back to defaults.")
+            readings = [3.76, 5.06, 3.40]
+    else:
+        log_and_print("\nEnter electricity consumption for up to 10 meters in kW.")
+        log_and_print("Format: comma separated values (e.g., 3.5, 4.2, 5.1)")
+        user_input = input("Data: ").strip()
+        try:
+            readings = [float(x.strip()) for x in user_input.split(',')]
+            if len(readings) > 10:
+                log_and_print("[WARN] Truncating to 10 meters max.")
+                readings = readings[:10]
+        except Exception:
+            log_and_print("[ERROR] Invalid input. Falling back to [3.5, 4.2, 5.1]")
+            readings = [3.5, 4.2, 5.1]
+            
+    n = len(readings)
+    if n == 0:
+        log_and_print("[ERROR] No data provided.")
+        return
+        
+    log_and_print(f"\n[ Working with {n} Smart Meters ]")
+    for i, val in enumerate(readings):
+        log_and_print(f"  SM{i+1}: {val:.3f} kW")
+        
     input("\n[Press Enter to execute Fault Tolerance Demo] ")
-    log_and_print("\n--- Scenario: Meter 2 Goes Offline ---")
-    log_and_print("AG buffer: [SM1_ctx, NONE, SM3_ctx]")
-    log_and_print("AG substitutes TTP Dummy for SM2: [SM1_ctx, DUMMY_ctx, SM3_ctx]")
-    log_and_print("Dummy decrypts to 0. Mask sum adjusted: K = k1 + 0 + k3.")
-    log_and_print("Network continues functioning without crashing.")
+    log_and_print("\n--- Scenario: Random Meter Goes Offline ---")
+    if n > 1:
+        offline_idx = random.randint(0, n-1)
+        log_and_print(f"WARNING: SM{offline_idx+1} suddenly lost connection!")
+        
+        log_and_print("AG detects missing ciphertext. Submitting request to TTP for dummy.")
+        log_and_print(f"AG substitutes TTP Dummy for SM{offline_idx+1}.")
+        
+        log_and_print("Dummy decrypts to 0 kW. Mask sum dynamically adjusted by CC.")
+        valid_readings = [r for i, r in enumerate(readings) if i != offline_idx]
+        actual_agg = sum(valid_readings)
+        log_and_print(f"Decrypted Aggregate without SM{offline_idx+1} = {actual_agg:.3f} kW")
+        log_and_print("Network continues functioning without crashing.")
+    else:
+        log_and_print("Only 1 meter. Cannot simulate a meaningful offline fault.")
+        actual_agg = sum(readings)
     
     input("\n[Press Enter to execute Billing Demo] ")
-    log_and_print("\n--- Feeder Billing Demo ---")
-    log_and_print("Decrypted Aggregate: 12.235 kW for 3 users.")
-    log_and_print("Average: 4.078 kW per user.")
-    log_and_print("Applying DERC Tariff Slab 1 (INR 3.00/kWh):")
-    log_and_print("Estimated Feeder Revenue: 4.078 * 3.00 * 3 = INR 36.70")
-    log_and_print("\nMathematical Walkthrough Complete.")
+    log_and_print("\n--- Feeder Billing Demo (DERC Slabs) ---")
+    avg_consumption = actual_agg / max(1, n if n==1 else n-1)
+    log_and_print(f"Average consumption for online meters: {avg_consumption:.3f} kW")
+    log_and_print("Applying DERC Tariff:")
+    if avg_consumption <= 2.0:
+        rate = 3.00
+    elif avg_consumption <= 4.0:
+        rate = 4.50
+    else:
+        rate = 6.50
+        
+    log_and_print(f"Slab Rate: INR {rate:.2f} / kWh")
+    revenue = actual_agg * rate
+    log_and_print(f"Estimated Feeder Revenue: {actual_agg:.3f} * {rate:.2f} = INR {revenue:.2f}")
+    log_and_print("\nDynamic Walkthrough Complete.")
 
 # ─── Runner ───
 def run_mode():

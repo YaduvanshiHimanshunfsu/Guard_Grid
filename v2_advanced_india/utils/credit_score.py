@@ -145,7 +145,7 @@ class CreditTracker:
         if save_path:
             plt.savefig(save_path, dpi=150)
             print(f"[Plot] Saved to {save_path}")
-        plt.show()
+        plt.close(fig)
 
     def export_json(self, path: str) -> None:
         """Persist scores and history to a JSON file."""

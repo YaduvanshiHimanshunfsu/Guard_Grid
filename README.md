@@ -4,6 +4,11 @@ A Python implementation of a privacy-preserving smart-meter data aggregation pro
 
 ## Project Structure
 
+* **[`starter.py`](starter.py)** — An interactive, dynamic demonstration script for presentations.
+* **[`v1_research_demo/`](v1_research_demo/)** — The foundational implementation validating the theoretical math of the paper.
+* **[`v2_advanced_india/`](v2_advanced_india/)** — The production-ready extension featuring fault tolerance and billing. ([Read the V2 Documentation](v2_advanced_india/README.md))
+* **[`shared/`](shared/)** — Contains the original `smart_grid_stability_augmented.csv` dataset.
+
 ```
 GuardGrid/
 ├── shared/                       # Common dataset (14 MB CSV)

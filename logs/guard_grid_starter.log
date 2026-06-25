@@ -1,0 +1,139 @@
+2026-06-26 00:12:49 [INFO] 
+================================================================================
+                      G U A R D   G R I D
+           Privacy-Preserving Smart Meter Data Aggregation
+================================================================================
+
+[ Project Overview ]
+* Goal: Ensuring data privacy and security in smart meter networks.
+* Context: Summer Internship Project.
+* Foundation: Built upon the "Guard Grid" cryptographic research paper.
+* Objective: Evaluating practical feasibility, improving the theoretical
+             solution, and simulating real-world fault tolerance.
+
+[ Team & Mentorship ]
+* Developed by: Himanshu Yadav & A.Tanmayee
+* Under the Guidance of: Dr. Jayshree Gupta (Assistant Professor)
+* Institution: IIIT Allahabad
+
+================================================================================
+    
+2026-06-26 00:12:49 [INFO] [INFO] Checking system dependencies in the background...
+2026-06-26 00:12:49 [INFO] 
+[INFO] Missing libraries detected: pymife
+2026-06-26 00:12:49 [INFO]        Estimated Download Size: ~25 MB
+2026-06-26 00:12:49 [INFO]        Estimated Install Time: ~15 seconds
+2026-06-26 00:13:11 [INFO] 
+[INFO] Starting installation...
+2026-06-26 00:13:36 [INFO] 
+[OK] All libraries installed successfully!
+2026-06-26 00:13:36 [INFO] 
+[ Select Execution Mode ]
+2026-06-26 00:13:36 [INFO]   1. Run V1: Research Demo
+2026-06-26 00:13:36 [INFO]      - Pure implementation of the research paper model.
+2026-06-26 00:13:36 [INFO]      - Validates theoretical equations with slight improvements.
+2026-06-26 00:13:36 [INFO]   2. Run V2: Advanced India Version
+2026-06-26 00:13:36 [INFO]      - Production-oriented, practical version.
+2026-06-26 00:13:36 [INFO]      - Features fault tolerance, time-series intervals, and billing.
+2026-06-26 00:13:36 [INFO]   3. Exit
+2026-06-26 00:14:09 [INFO] 
+[INFO] Launching V1: Research Demo...
+2026-06-26 00:14:09 [INFO] [INFO] V1 Execution completed.
+2026-06-26 00:14:27 [INFO] 
+[ Select Execution Mode ]
+2026-06-26 00:14:27 [INFO]   1. Run V1: Research Demo
+2026-06-26 00:14:27 [INFO]      - Pure implementation of the research paper model.
+2026-06-26 00:14:27 [INFO]      - Validates theoretical equations with slight improvements.
+2026-06-26 00:14:27 [INFO]   2. Run V2: Advanced India Version
+2026-06-26 00:14:27 [INFO]      - Production-oriented, practical version.
+2026-06-26 00:14:27 [INFO]      - Features fault tolerance, time-series intervals, and billing.
+2026-06-26 00:14:27 [INFO]   3. Exit
+2026-06-26 00:14:29 [INFO] 
+[INFO] Launching V2: Advanced India Version...
+2026-06-26 00:14:29 [INFO] [INFO] V2 Execution completed.
+2026-06-26 00:14:37 [INFO] 
+Exiting GuardGrid Starter. Goodbye!
+2026-06-26 00:19:04 [INFO] 
+================================================================================
+                      G U A R D   G R I D
+           Privacy-Preserving Smart Meter Data Aggregation
+================================================================================
+
+[ Project Overview ]
+* Goal: Ensuring data privacy and security in smart meter networks.
+* Context: Summer Internship Project.
+* Foundation: Built upon the "Guard Grid" cryptographic research paper.
+* Objective: Evaluating practical feasibility, improving the theoretical
+             solution, and simulating real-world fault tolerance.
+
+[ Team & Mentorship ]
+* Developed by: Himanshu Yadav & A.Tanmayee
+* Under the Guidance of: Dr. Jayshree Gupta (Assistant Professor)
+* Institution: IIIT Allahabad
+
+================================================================================
+    
+2026-06-26 00:19:04 [INFO] [INFO] Checking system dependencies in the background...
+2026-06-26 00:19:04 [INFO] 
+[INFO] Missing libraries detected: pymife
+2026-06-26 00:19:04 [INFO]        Estimated Download Size: ~25 MB
+2026-06-26 00:19:04 [INFO]        Estimated Install Time: ~15 seconds
+2026-06-26 00:19:10 [INFO] 
+[INFO] Starting installation...
+2026-06-26 00:19:14 [INFO] 
+[OK] All libraries installed successfully!
+2026-06-26 00:19:14 [INFO] 
+[ Select Execution Mode ]
+2026-06-26 00:19:14 [INFO]   1. Run V1: Research Demo
+2026-06-26 00:19:14 [INFO]      - Pure implementation of the research paper model.
+2026-06-26 00:19:14 [INFO]      - Validates theoretical equations with slight improvements.
+2026-06-26 00:19:14 [INFO]   2. Run V2: Advanced India Version
+2026-06-26 00:19:14 [INFO]      - Production-oriented, practical version.
+2026-06-26 00:19:14 [INFO]      - Features fault tolerance, time-series intervals, and billing.
+2026-06-26 00:19:14 [INFO]   3. Exit
+2026-06-26 00:19:17 [INFO] 
+================================================================================
+2026-06-26 00:19:17 [INFO]   PRE-FLIGHT BRIEFING: V1 (RESEARCH DEMO)
+2026-06-26 00:19:17 [INFO] ================================================================================
+2026-06-26 00:19:17 [INFO] What you are about to see is the foundational cryptographic pipeline:
+2026-06-26 00:19:17 [INFO]   1. Setup: The TTP generates 512-bit safe primes, DH keys, and MIFE master keys.
+2026-06-26 00:19:17 [INFO]   2. Encryption: Each Smart Meter locally masks its reading using DH shared
+2026-06-26 00:19:17 [INFO]      secrets, then applies Functional Encryption (MIFE) and Homomorphic Hashing.
+2026-06-26 00:19:17 [INFO]   3. Aggregation: The Gateway (AG) blindly aggregates ciphertexts.
+2026-06-26 00:19:17 [INFO]   4. Verification: The Control Center (CC) uses LHH to cryptographically verify
+2026-06-26 00:19:17 [INFO]      the aggregate hasn't been tampered with, then decrypts the total sum.
+2026-06-26 00:19:17 [INFO]   5. Queries: The CC re-encrypts the aggregate for the Cloud Server
+2026-06-26 00:19:17 [INFO]      to evaluate specific functions blindly.
+2026-06-26 00:19:17 [INFO] ================================================================================
+2026-06-26 00:19:25 [INFO] 
+[INFO] Launching V1: Research Demo...
+2026-06-26 00:19:25 [INFO] [INFO] V1 Execution completed.
+2026-06-26 00:19:41 [INFO] 
+[ Select Execution Mode ]
+2026-06-26 00:19:41 [INFO]   1. Run V1: Research Demo
+2026-06-26 00:19:41 [INFO]      - Pure implementation of the research paper model.
+2026-06-26 00:19:41 [INFO]      - Validates theoretical equations with slight improvements.
+2026-06-26 00:19:41 [INFO]   2. Run V2: Advanced India Version
+2026-06-26 00:19:41 [INFO]      - Production-oriented, practical version.
+2026-06-26 00:19:41 [INFO]      - Features fault tolerance, time-series intervals, and billing.
+2026-06-26 00:19:41 [INFO]   3. Exit
+2026-06-26 00:19:44 [INFO] 
+================================================================================
+2026-06-26 00:19:44 [INFO]   PRE-FLIGHT BRIEFING: V2 (ADVANCED INDIA VERSION)
+2026-06-26 00:19:44 [INFO] ================================================================================
+2026-06-26 00:19:44 [INFO] This version simulates a real-world Smart Grid (India RDSS standard):
+2026-06-26 00:19:44 [INFO]   1. Time-Series: Processing a full day of data (96 slots of 15-minute intervals).
+2026-06-26 00:19:44 [INFO]   2. Fault Tolerance: We inject random meter failures. The system automatically
+2026-06-26 00:19:44 [INFO]      substitutes pre-generated 'dummy ciphertexts' so the network doesn't crash.
+2026-06-26 00:19:44 [INFO]   3. Anomaly Detection: A rolling z-score monitor tracks the decrypted
+2026-06-26 00:19:44 [INFO]      aggregates to detect power spikes or potential theft.
+2026-06-26 00:19:44 [INFO]   4. Credit Scoring: The Gateway earns or loses reputation points based on
+2026-06-26 00:19:44 [INFO]      the cryptographic verification of its aggregations.
+2026-06-26 00:19:44 [INFO]   5. Billing: The system calculates estimated feeder-level revenue using
+2026-06-26 00:19:44 [INFO]      the official 3-slab DERC domestic tariff (Delhi).
+2026-06-26 00:19:44 [INFO] ================================================================================
+2026-06-26 00:19:46 [INFO] 
+[INFO] Launching V2: Advanced India Version...
+2026-06-26 00:19:46 [INFO] [INFO] V2 Execution completed.
+2026-06-26 00:19:50 [INFO] 
+Exiting GuardGrid Starter. Goodbye & Thank You!

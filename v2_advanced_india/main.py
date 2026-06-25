@@ -53,10 +53,6 @@ def run_simulation(n_users: int, faults: int, n_days: int = 1, theft_meter: int 
         sm = SmartMeter(i, sm_keys["sm_dh_private"], sm_keys["cc_dh_public"], fehh_params)
         smart_meters.append(sm)
 
-    if 0 <= theft_meter < n_users:
-        smart_meters[theft_meter].theft_factor = 0.5
-        print(f"\n[THEFT] SM_{theft_meter} is set to report 50% of actual reading.")
-
     ag_keys = ttp.get_ag_keys()
     ag = AggregationGateway(ag_keys, sys_params["backup_ciphertexts"])
     
@@ -94,48 +90,54 @@ def run_simulation(n_users: int, faults: int, n_days: int = 1, theft_meter: int 
 
     for day in range(n_days):
         total_for_day = 0.0
+        
+        # Apply theft only on the last day to trigger anomaly
+        if day == n_days - 1 and 0 <= theft_meter < n_users:
+            smart_meters[theft_meter].theft_factor = 0.5
+            print(f"\n[THEFT] Day {day+1}: SM_{theft_meter} is set to report 50% of actual reading.")
+            
         for slot in range(SLOTS_PER_DAY):
             # 1. Fault generation
             online_mask = fault_handler.simulate_offline(faults)
-        fault_handler.log_round(slot, online_mask)
-        
-        # 2. Extract readings for this slot
-        slot_readings = get_slot_readings(timeseries, day=day, slot=slot)
-        
-        # 3. Smart Meters Encrypt
-        for i, sm in enumerate(smart_meters):
-            if online_mask[i]:
-                res = sm.encrypt(slot_readings[i])
-                ag.receive_or_mark_offline(res, i)
-            else:
-                ag.receive_or_mark_offline(None, i)
-                
-        # 4. Aggregation and Verification
-        # In V2, aggregate_time_slot handles AG aggregation and CC verification/decryption.
-        # It needs enc_results which in our OOP model the AG already collected.
-        enc_results = ag.flush_collected()
-        agg_res = aggregate_time_slot(slot, enc_results, sys_params, session_keys, SCALE)
-        
-        # 5. Credit Scoring
-        credit_tracker.record_round(ag_id, agg_res["verified"])
-        
-        # 6. Anomaly Detection (only checking against past slots if we had >1 day data, 
-        # but here we just record it. In a multi-day sim it would flag).
-        # We can simulate by treating consecutive slots as time series for the detector.
-        # Wait, the anomaly detector expects `slot_id` to mean time-of-day. 
-        # Since we only have 1 day, it won't trigger. That's fine, we still record.
-        anom_res = anomaly_detector.check(slot, agg_res["aggregate_float"])
-        anomaly_detector.record(slot, agg_res["aggregate_float"])
-        if anom_res.is_anomaly:
-            anomalies_detected += 1
-            print(f"          [Slot {slot}] {anom_res.message}")
-
-        total_for_day += agg_res["aggregate_float"]
-        
-        # Print progress every 16 slots
-        if (slot + 1) % 16 == 0 and n_days == 1:
-            print(f"          Processed {slot + 1:2d}/{SLOTS_PER_DAY} slots. "
-                  f"Current AG score: {credit_tracker.get_score(ag_id)}")
+            fault_handler.log_round(slot, online_mask)
+            
+            # 2. Extract readings for this slot
+            slot_readings = get_slot_readings(timeseries, day=day, slot=slot)
+            
+            # 3. Smart Meters Encrypt
+            for i, sm in enumerate(smart_meters):
+                if online_mask[i]:
+                    res = sm.encrypt(slot_readings[i])
+                    ag.receive_or_mark_offline(res, i)
+                else:
+                    ag.receive_or_mark_offline(None, i)
+                    
+            # 4. Aggregation and Verification
+            # In V2, aggregate_time_slot handles AG aggregation and CC verification/decryption.
+            # It needs enc_results which in our OOP model the AG already collected.
+            enc_results = ag.flush_collected()
+            agg_res = aggregate_time_slot(slot, enc_results, sys_params, session_keys, SCALE)
+            
+            # 5. Credit Scoring
+            credit_tracker.record_round(ag_id, agg_res["verified"])
+            
+            # 6. Anomaly Detection (only checking against past slots if we had >1 day data, 
+            # but here we just record it. In a multi-day sim it would flag).
+            # We can simulate by treating consecutive slots as time series for the detector.
+            # Wait, the anomaly detector expects `slot_id` to mean time-of-day. 
+            # Since we only have 1 day, it won't trigger. That's fine, we still record.
+            anom_res = anomaly_detector.check(slot, agg_res["aggregate_float"])
+            anomaly_detector.record(slot, agg_res["aggregate_float"])
+            if anom_res.is_anomaly:
+                anomalies_detected += 1
+                print(f"          [Slot {slot}] {anom_res.message}")
+    
+            total_for_day += agg_res["aggregate_float"]
+            
+            # Print progress every 16 slots
+            if (slot + 1) % 16 == 0 and n_days == 1:
+                print(f"          Processed {slot + 1:2d}/{SLOTS_PER_DAY} slots. "
+                      f"Current AG score: {credit_tracker.get_score(ag_id)}")
 
         daily_totals.append(total_for_day)
         print(f"  [Day {day+1}] Total: {total_for_day:.2f} kWh")

@@ -47,7 +47,7 @@ def display_header():
              solution, and simulating real-world fault tolerance.
 
 [ Team & Mentorship ]
-* Developed by: Himanshu Yadav & A. Tanmayye
+* Developed by: Himanshu Yadav & A.Tanmayee
 * Under the Guidance of: Dr. Jayshree Gupta (Assistant Professor)
 * Institution: IIIT Allahabad
 

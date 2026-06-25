@@ -29,6 +29,9 @@ from __future__ import annotations
 
 import sys
 import time
+import argparse
+import random
+import statistics
 from pathlib import Path
 
 # Ensure the V1 root is on the import path so all packages resolve.
@@ -43,7 +46,7 @@ from entities.control_center import ControlCenter     # noqa: E402
 from entities.cloud_server import CloudServer         # noqa: E402
 
 
-def run_simulation(n: int = N_USERS) -> None:
+def run_simulation(n: int = N_USERS, tamper: bool = False) -> None:
     """Run the full GuardGrid simulation with n smart meters."""
 
     print("=" * 70)
@@ -116,14 +119,27 @@ def run_simulation(n: int = N_USERS) -> None:
     t0 = time.perf_counter()
 
     all_session_keys: list[int] = []
+    enc_times: list[float] = []
     for i, sm in enumerate(smart_meters):
+        t_sm = time.perf_counter()
         result = sm.encrypt(readings[i])
+        enc_times.append(time.perf_counter() - t_sm)
         # SM sends (ctx, h) to the AG.  ki stays with the SM.
         ag.receive({"ctx": result["ctx"], "h": result["h"]})
         all_session_keys.append(result["ki"])
 
+    if tamper:
+        tamper_idx = random.randint(0, n - 1)
+        ag._collected[tamper_idx]['h'] += 1
+        print(f"\n[TAMPER] AG corrupted hash at slot {tamper_idx}")
+
     t_enc = time.perf_counter() - t0
-    print(f"           Done in {t_enc:.3f}s  ({t_enc/n*1000:.2f} ms per SM).\n")
+    avg_enc = statistics.mean(enc_times) * 1000
+    min_enc = min(enc_times) * 1000
+    max_enc = max(enc_times) * 1000
+    std_enc = statistics.stdev(enc_times) * 1000 if len(enc_times) > 1 else 0.0
+    print(f"           Done in {t_enc:.3f}s.")
+    print(f"           Encrypt times — min: {min_enc:.2f} ms  |  max: {max_enc:.2f} ms  |  avg: {avg_enc:.2f} ms  |  stdev: {std_enc:.2f} ms\n")
 
     # ─────────────────────────────────────────────────────────────────────
     # Phase 3: Aggregation  (AG)  +  Verification & Decryption  (CC)
@@ -140,8 +156,11 @@ def run_simulation(n: int = N_USERS) -> None:
     dec_result = cc.verify_and_decrypt(agg_result["C_prime"], agg_result["h_star"])
     t_dec = time.perf_counter() - t0
 
-    status = "PASSED" if dec_result["verified"] else "FAILED"
-    print(f"           Verification:  {status}")
+    if dec_result["verified"]:
+        print("           Verification:  PASSED — AG was honest.")
+    else:
+        print("           Verification:  FAILED — Tamper detected! AG corrupted the aggregate.")
+        print("           Note: The decrypted value below is UNTRUSTWORTHY.")
     print(f"           True aggregate C = {dec_result['C']}")
     print(f"           Aggregate (float) = {dec_result['aggregate_float']:.4f}")
     print(f"           Expected          = {expected_sum:.4f}")
@@ -179,7 +198,10 @@ def run_simulation(n: int = N_USERS) -> None:
     match = abs(dec_result["aggregate_float"] - expected_sum) < 1e-6
     print(f"\n{'-'*70}")
     print(f"  Total time:  {total:.3f}s")
-    print(f"  Match:       {'YES' if match else 'NO'}")
+    if not dec_result["verified"] and tamper:
+        print(f"  Match:       NO (Tamper successfully caught by LHH!)")
+    else:
+        print(f"  Match:       {'YES' if match else 'NO'}")
     print(f"{'-'*70}\n")
 
 
@@ -188,10 +210,20 @@ def run_simulation(n: int = N_USERS) -> None:
 # ──────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "benchmark":
+    parser = argparse.ArgumentParser(description="GuardGrid V1 Research Demo")
+    parser.add_argument("command_or_n", nargs="?", default=str(N_USERS), 
+                        help="Number of users (e.g. 10), 'benchmark', or 'sweep'")
+    parser.add_argument("--tamper", action="store_true", 
+                        help="Simulate AG tampering with one hash to demo LHH")
+    args = parser.parse_args()
+
+    if args.command_or_n == "benchmark":
         from benchmark.measure import run_benchmarks, plot_results  # noqa: E402
         results = run_benchmarks()
         plot_results(results)
+    elif args.command_or_n == "sweep":
+        from benchmark.measure import run_security_sweep
+        run_security_sweep()
     else:
-        n = int(sys.argv[1]) if len(sys.argv) > 1 else N_USERS
-        run_simulation(n)
+        n = int(args.command_or_n)
+        run_simulation(n, tamper=args.tamper)

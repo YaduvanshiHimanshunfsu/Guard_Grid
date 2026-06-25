@@ -113,6 +113,40 @@ class CreditTracker:
             fail_count=sum(1 for h in history if not h["verified"]),
         )
 
+    def get_score_history(self, ag_id: str) -> list[int]:
+        self._ensure_ag(ag_id)
+        return [h['score_after'] for h in self._history[ag_id]]
+
+    def plot_score_history(self, ag_id: str, save_path: str = None) -> None:
+        scores = self.get_score_history(ag_id)
+        if len(scores) == 0:
+            print("No history to plot.")
+            return
+        
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(figsize=(12, 4))
+        ax.plot(scores, color='steelblue', linewidth=1.5, label='Credit Score')
+        ax.axhline(y=50, color='orange', linestyle='--', linewidth=1, label='Flag threshold (50)')
+        ax.axhline(y=20, color='red', linestyle='--', linewidth=1, label='Revoke threshold (20)')
+        ax.axhline(y=100, color='green', linestyle=':', linewidth=0.8, label='Max (100)')
+        
+        # Shade regions where score is below flag threshold
+        for i, s in enumerate(scores):
+            if s < 50:
+                ax.axvspan(i-0.5, i+0.5, alpha=0.15, color='orange')
+        
+        ax.set_xlabel('Round Number')
+        ax.set_ylabel('Credit Score')
+        ax.set_title(f'AG Credit Score Trajectory — {ag_id}')
+        ax.legend(loc='lower left')
+        ax.set_ylim(0, 110)
+        plt.tight_layout()
+        
+        if save_path:
+            plt.savefig(save_path, dpi=150)
+            print(f"[Plot] Saved to {save_path}")
+        plt.show()
+
     def export_json(self, path: str) -> None:
         """Persist scores and history to a JSON file."""
         data = {}

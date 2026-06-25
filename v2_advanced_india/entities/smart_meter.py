@@ -45,7 +45,7 @@ class SmartMeter:
     """Represents a single smart meter in the simulation."""
 
     def __init__(self, slot_index: int, sm_dh_private: int,
-                 cc_dh_public: int, fehh_params: dict):
+                 cc_dh_public: int, fehh_params: dict, theft_factor: float = 1.0):
         """
         Parameters
         ----------
@@ -53,11 +53,13 @@ class SmartMeter:
         sm_dh_private : int – this SM's DH private key.
         cc_dh_public  : int – CC's DH public key for this slot.
         fehh_params   : dict – output of fehh_setup.
+        theft_factor  : float – multiplier for simulated power theft.
         """
         self.slot_index = slot_index
         self.sm_dh_private = sm_dh_private
         self.cc_dh_public = cc_dh_public
         self.fehh_params = fehh_params
+        self.theft_factor = theft_factor
 
     def encrypt(self, x_i: int) -> dict:
         """Encrypt a single reading and produce the (ctx, h, ki) bundle.
@@ -79,7 +81,7 @@ class SmartMeter:
             ki  – session key (int, kept by SM).
         """
         return fehh_enc(
-            x_i=x_i,
+            x_i=int(x_i * self.theft_factor),
             slot_index=self.slot_index,
             params=self.fehh_params,
             sm_private=self.sm_dh_private,

@@ -32,10 +32,10 @@ from utils.anomaly_detector import AnomalyDetector
 from utils.billing import compute_feeder_revenue
 
 
-def run_simulation(n_users: int, faults: int) -> None:
+def run_simulation(n_users: int, faults: int, n_days: int = 1, theft_meter: int = -1) -> None:
     print("=" * 80)
     print(f"  GuardGrid V2 – Advanced India Version | {n_users} Meters | {faults} Faults/Round")
-    print(f"  Simulating one full day ({SLOTS_PER_DAY} slots of 15 mins)")
+    print(f"  Simulating {n_days} day(s) ({SLOTS_PER_DAY} slots of 15 mins per day)")
     print("=" * 80)
 
     # ── Init TTP and generate keys ──
@@ -52,6 +52,10 @@ def run_simulation(n_users: int, faults: int) -> None:
         sm_keys = ttp.get_sm_keys(i)
         sm = SmartMeter(i, sm_keys["sm_dh_private"], sm_keys["cc_dh_public"], fehh_params)
         smart_meters.append(sm)
+
+    if 0 <= theft_meter < n_users:
+        smart_meters[theft_meter].theft_factor = 0.5
+        print(f"\n[THEFT] SM_{theft_meter} is set to report 50% of actual reading.")
 
     ag_keys = ttp.get_ag_keys()
     ag = AggregationGateway(ag_keys, sys_params["backup_ciphertexts"])
@@ -77,22 +81,26 @@ def run_simulation(n_users: int, faults: int) -> None:
 
     # ── Load Time-Series Data ──
     print(f"\n[Data]    Loading time-series data for {n_users} users...")
-    timeseries = load_timeseries(n_users, n_days=1)
+    timeseries = load_timeseries(n_users, n_days=n_days)
     
     ag_id = "AG_Feeder_1"
-    total_aggregate_kwh = 0.0
     anomalies_detected = 0
 
-    print("\n[Phase 2 & 3] Starting 96-slot Daily Cycle...")
+    print(f"\n[Phase 2 & 3] Starting {n_days}-day Cycle...")
     t_cycle_start = time.perf_counter()
 
-    for slot in range(SLOTS_PER_DAY):
-        # 1. Fault generation
-        online_mask = fault_handler.simulate_offline(faults)
+    daily_totals = []
+    Path('v2_outputs').mkdir(exist_ok=True)
+
+    for day in range(n_days):
+        total_for_day = 0.0
+        for slot in range(SLOTS_PER_DAY):
+            # 1. Fault generation
+            online_mask = fault_handler.simulate_offline(faults)
         fault_handler.log_round(slot, online_mask)
         
         # 2. Extract readings for this slot
-        slot_readings = get_slot_readings(timeseries, day=0, slot=slot)
+        slot_readings = get_slot_readings(timeseries, day=day, slot=slot)
         
         # 3. Smart Meters Encrypt
         for i, sm in enumerate(smart_meters):
@@ -122,20 +130,45 @@ def run_simulation(n_users: int, faults: int) -> None:
             anomalies_detected += 1
             print(f"          [Slot {slot}] {anom_res.message}")
 
-        total_aggregate_kwh += agg_res["aggregate_float"]
+        total_for_day += agg_res["aggregate_float"]
         
         # Print progress every 16 slots
-        if (slot + 1) % 16 == 0:
+        if (slot + 1) % 16 == 0 and n_days == 1:
             print(f"          Processed {slot + 1:2d}/{SLOTS_PER_DAY} slots. "
                   f"Current AG score: {credit_tracker.get_score(ag_id)}")
 
+        daily_totals.append(total_for_day)
+        print(f"  [Day {day+1}] Total: {total_for_day:.2f} kWh")
+
     t_cycle_end = time.perf_counter()
     print(f"          Cycle complete in {t_cycle_end - t_cycle_start:.3f}s.")
+    
+    for i in range(1, len(daily_totals)):
+        delta = daily_totals[i] - daily_totals[i-1]
+        pct = (delta / daily_totals[i-1]) * 100
+        print(f"  Day {i}->{i+1}: {delta:+.2f} kWh ({pct:+.1f}%)")
+    
+    if n_days > 1:
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.plot(range(1, n_days + 1), daily_totals, marker='o')
+        mean_kwh = sum(daily_totals) / len(daily_totals)
+        ax.axhline(mean_kwh, color='r', linestyle='--', label=f'Mean ({mean_kwh:.1f})')
+        ax.set_xlabel('Day')
+        ax.set_ylabel('Total Daily kWh')
+        ax.set_title(f'Daily Aggregate — {n_users} Meters, {n_days} Days')
+        ax.legend()
+        plt.tight_layout()
+        plot_path = f'v2_outputs/trend_{n_users}m_{n_days}d.png'
+        plt.savefig(plot_path)
+        print(f"          [Plot] Saved trend to {plot_path}")
+        plt.close(fig)
 
     # ── Phase 4: Feeder Billing (End of Day) ──
     print("\n[Phase 4] Computing Feeder-Level Billing Estimate...")
-    bill = compute_feeder_revenue(total_aggregate_kwh, n_users)
-    print(f"          Total daily consumption: {total_aggregate_kwh:.2f} kWh")
+    total_consumption = sum(daily_totals)
+    bill = compute_feeder_revenue(total_consumption, n_users)
+    print(f"          Total overall consumption: {total_consumption:.2f} kWh")
     print(f"          Estimated revenue:       INR {bill.total_revenue_inr}")
     print(f"          Average per meter:       {bill.avg_per_meter_kwh:.2f} kWh (INR {bill.avg_per_meter_bill_inr})")
     print(f"          Slab applied (avg):      {bill.tariff_slab_applied}")
@@ -173,6 +206,20 @@ def run_simulation(n_users: int, faults: int) -> None:
     print(f"  AG Score:     {ag_status.score}/100 [{ag_status.status}]")
     print(f"                ({ag_status.pass_count} passes, {ag_status.fail_count} fails)")
     print("=" * 80 + "\n")
+    
+    if 0 <= theft_meter < n_users and n_days >= 3:
+        expected_daily = (daily_totals[0] + daily_totals[1]) / 2.0
+        actual_daily = daily_totals[-1]
+        loss = expected_daily - actual_daily
+        avg_rate = bill.total_revenue_inr / total_consumption if total_consumption > 0 else 0
+        print(f"[THEFT ANALYSIS] Expected: {expected_daily:.2f} kWh | Actual: {actual_daily:.2f} kWh")
+        print(f"  Estimated loss: {loss:.2f} kWh = INR {loss * avg_rate:.2f}")
+        print(f"  Anomalies flagged during theft: {anomalies_detected}\n")
+
+    credit_tracker.plot_score_history(
+        ag_id, 
+        save_path=f'v2_outputs/credit_{ag_id}_{n_users}m.png'
+    )
 
 
 if __name__ == "__main__":
@@ -181,6 +228,10 @@ if __name__ == "__main__":
                         help="Number of smart meters")
     parser.add_argument("--faults", type=int, default=DEFAULT_OFFLINE_COUNT,
                         help="Number of offline meters per round")
+    parser.add_argument("--days", type=int, default=1,
+                        help="Number of days to simulate")
+    parser.add_argument("--theft-meter", type=int, default=-1,
+                        help="Index of meter to simulate power theft (default: -1 for none)")
     
     if len(sys.argv) > 1 and sys.argv[1] == "benchmark":
         from benchmark.measure import run_benchmarks, plot_results
@@ -188,4 +239,4 @@ if __name__ == "__main__":
         plot_results(results)
     else:
         args = parser.parse_args()
-        run_simulation(args.n_users, args.faults)
+        run_simulation(args.n_users, args.faults, args.days, args.theft_meter)

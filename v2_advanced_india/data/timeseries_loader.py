@@ -62,10 +62,11 @@ def load_timeseries(n_users: int, n_days: int = 1,
         raise KeyError(f"Column '{col}' not found. Available: {list(df.columns)}")
 
     if len(df) < total_rows_needed:
+        max_days = len(df) // (n_users * SLOTS_PER_DAY)
         raise ValueError(
             f"Need {total_rows_needed} rows for {n_users} users × {n_days} days × "
             f"{SLOTS_PER_DAY} slots, but dataset has only {len(df)} rows. "
-            f"Reduce n_users or n_days."
+            f"Dataset supports maximum {max_days} days for {n_users} meters. Reduce n_users or n_days."
         )
 
     raw = (df[col].head(total_rows_needed) * SCALE).astype(int).tolist()

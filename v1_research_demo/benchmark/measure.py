@@ -251,10 +251,41 @@ def plot_results(results: list[dict], save_dir: str = "plots") -> None:
     print(f"\n✓  All plots saved to '{save_dir}/'")
 
 
+def run_security_sweep() -> None:
+    print("\n" + "="*70)
+    print("  SECURITY PARAMETER SWEEP")
+    print("="*70)
+    print("  Bits | Setup (s) | Encrypt/SM (ms) | Aggregate (ms) | Security Level")
+    print("  -----|-----------|-----------------|----------------|---------------")
+
+    bits_list = [512, 1024, 2048]
+    for b in bits_list:
+        r = _run_pipeline(n=5, bits=b)
+        
+        setup_s = r['t_init']
+        enc_ms = r['t_enc_per_sm'] * 1000
+        agg_ms = r['t_agg'] * 1000
+        
+        if b == 512:
+            sec_level = "DEMO ONLY"
+        elif b == 1024:
+            sec_level = "Weak (deprecated)"
+        else:
+            sec_level = "Production minimum"
+            
+        print(f"  {b:4d} | {setup_s:9.2f} | {enc_ms:15.1f} | {agg_ms:14.1f} | {sec_level}")
+
+    print("\n  Note: NIST recommends 2048-bit minimum for DH. 512-bit is broken")
+    print("  by academic teams (Logjam, 2015). This table shows the performance cost of security.\n")
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # CLI entry point
 # ──────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    results = run_benchmarks()
-    plot_results(results)
+    if len(sys.argv) > 1 and sys.argv[1] == "sweep":
+        run_security_sweep()
+    else:
+        results = run_benchmarks()
+        plot_results(results)

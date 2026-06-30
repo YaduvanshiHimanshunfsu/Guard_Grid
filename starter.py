@@ -50,7 +50,7 @@ def display_header():
 
 [ Team & Mentorship ]
 * Developed by: Himanshu Yadav & A.Tanmayee
-* Under the Guidance of: Dr. Jayshree Gupta (Assistant Professor)
+* Under the Guidance of: Dr. Jayasree Sengupta (Assistant Professor)
 * Institution: IIIT Allahabad
 
 ================================================================================
@@ -62,7 +62,9 @@ REQUIRED_LIBS = {
     "pymife": "pymife",
     "gmpy2": "gmpy2",
     "pandas": "pandas",
-    "matplotlib": "matplotlib"
+    "matplotlib": "matplotlib",
+    "numpy": "numpy",
+    "kyber_py": "kyber-py"
 }
 
 def check_dependencies() -> list:
@@ -129,6 +131,20 @@ def explain_v2():
     log_and_print("     the official 3-slab DERC domestic tariff (Delhi).")
     log_and_print("="*80)
     input("Press Enter to begin the V2 full-day simulation... ")
+
+def explain_v3():
+    log_and_print("\n" + "="*80)
+    log_and_print("  PRE-FLIGHT BRIEFING: V3 (ADVANCED SECURITY CONCEPT)")
+    log_and_print("="*80)
+    log_and_print("This version implements a Post-Quantum & Privacy-Preserving architecture:")
+    log_and_print("  1. Post-Quantum Keys: ML-KEM-768 (FIPS 203) replaces Diffie-Hellman.")
+    log_and_print("  2. Differential Privacy: Laplace noise obscures individual readings.")
+    log_and_print("  3. Zero-Knowledge: Pedersen commitments prove readings are valid (0-6kW).")
+    log_and_print("  4. Decentralized Setup: Feldman VSS & Pedersen DKG replace the TTP.")
+    log_and_print("  5. Lattice FE: Cloud server uses LWE-based Functional Encryption.")
+    log_and_print("  6. Traffic Padding: Dummy packets defeat timing analysis.")
+    log_and_print("="*80)
+    input("Press Enter to begin the V3 Post-Quantum simulation... ")
 
 def demo_math_v1():
     log_and_print("\n" + "="*80)
@@ -305,9 +321,11 @@ def run_mode():
     log_and_print("  2. Run V2: Advanced India Version")
     log_and_print("     - Production-oriented, practical version.")
     log_and_print("     - Features fault tolerance, time-series intervals, and billing.")
-    log_and_print("  3. Exit")
+    log_and_print("  3. Run V3: Advanced Security Concept")
+    log_and_print("     - Post-Quantum crypto, Differential Privacy, ZKP, Lattice FE.")
+    log_and_print("  4. Exit")
     
-    choice = input("\nEnter your choice (1/2/3): ").strip()
+    choice = input("\nEnter your choice (1/2/3/4): ").strip()
     
     if choice == '1':
         explain_v1()
@@ -353,10 +371,27 @@ def run_mode():
         log_and_print("[INFO] V2 Execution completed.", logging.INFO)
         
     elif choice == '3':
+        explain_v3()
+        log_and_print("\n[ Select V3 Execution Profile ]")
+        log_and_print("  1. Standard PQ Simulation")
+        log_and_print("  2. PQ Cryptography Overhead Benchmark")
+        v3_choice = input("\nEnter your choice (1/2): ").strip()
+        
+        log_and_print("\n[INFO] Launching V3: Advanced Security Concept...", logging.INFO)
+        script_dir = Path(__file__).resolve().parent / "v3_advanced_security_concept"
+        
+        if v3_choice == '2':
+            subprocess.run([sys.executable, "-m", "benchmark.measure_v3"], cwd=script_dir)
+        else:
+            subprocess.run([sys.executable, "main.py"], cwd=script_dir)
+            
+        log_and_print("[INFO] V3 Execution completed.", logging.INFO)
+        
+    elif choice == '4':
         log_and_print("\nExiting GuardGrid Starter. Goodbye!", logging.INFO)
         sys.exit(0)
     else:
-        log_and_print("\n[ERROR] Invalid choice. Please enter 1, 2, or 3.", logging.WARNING)
+        log_and_print("\n[ERROR] Invalid choice. Please enter 1, 2, 3, or 4.", logging.WARNING)
         run_mode()
 
 def main():

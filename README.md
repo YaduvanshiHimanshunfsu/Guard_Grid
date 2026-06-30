@@ -7,7 +7,7 @@ A Python implementation of a privacy-preserving smart-meter data aggregation pro
 * **[`starter.py`](starter.py)** — An interactive, dynamic demonstration script for presentations.
 * **[`v1_research_demo/`](v1_research_demo/)** — The foundational implementation validating the theoretical math of the paper.
 * **[`v2_advanced_india/`](v2_advanced_india/)** — The production-ready extension featuring fault tolerance and billing. ([Read the V2 Documentation](v2_advanced_india/README.md))
-* **[`v3_advanced_security_concept/`](v3_advanced_security_concept/)** — Future theoretical architecture proposing post-quantum lattice cryptography, differential privacy, and decentralized oracles. ([Read the V3 Concept Docs](v3_advanced_security_concept/README.md))
+* **[`v3_advanced_security_concept/`](v3_advanced_security_concept/)** — The state-of-the-art implementation featuring Post-Quantum lattice cryptography (ML-KEM-768), Differential Privacy, Zero-Knowledge Proofs, and Decentralized Setup (DKG). ([Read the V3 Architecture Docs](v3_advanced_security_concept/README.md))
 * **[`shared/`](shared/)** — Contains the original `smart_grid_stability_augmented.csv` dataset.
 
 ```
@@ -62,6 +62,14 @@ python main.py 10 --faults 2  # 10 meters, 2 random offline per round
 python main.py benchmark    # V2-specific benchmarks
 ```
 
+### Run V3 (Advanced Security)
+```bash
+cd v3_advanced_security_concept
+python main.py                  # Full PQ crypto + DP + ZKP simulation (10 meters)
+python main.py 20               # 20 meters
+python benchmark/measure_v3.py  # V3 cryptography overhead benchmark
+```
+
 ## The Four-Phase Protocol
 
 | Phase | Actor | Action |
@@ -81,6 +89,16 @@ python main.py benchmark    # V2-specific benchmarks
 | Anomaly Detection | Rolling-window z-score flagging on decrypted aggregates |
 | Credit Scoring | AG reputation tracking (pass/fail per round) |
 | Shamir | Threshold secret sharing primitive (standalone) |
+
+## V3 Advancements
+
+| Feature | Description |
+|---------|-------------|
+| Post-Quantum KEM | Replaces Diffie-Hellman with NIST FIPS 203 (ML-KEM-768) |
+| Differential Privacy | Laplace noise injection to mask individual grid activity |
+| Zero-Knowledge Proofs | Non-interactive range proofs via Fiat-Shamir heuristic |
+| Decentralized Setup | Feldman VSS & Pedersen DKG replace the single-point-of-failure TTP |
+| Lattice FE | Replaces DDH-based Functional Encryption with LWE-based Lattice FE for cloud queries |
 
 ## Dataset
 

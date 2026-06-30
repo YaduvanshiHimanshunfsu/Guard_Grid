@@ -139,7 +139,7 @@ class ControlCenter:
         verified = lhh_verify(C_prime, h_star, self.lhh_g, self.lhh_p)
 
         if not verified:
-            print("[CC] ⚠  Verification FAILED – AG may be misbehaving!")
+            print("[CC] [ALERT] Verification FAILED – AG may be misbehaving!")
 
         # Step 2+3: unmask.
         session_keys = self._compute_session_keys()
